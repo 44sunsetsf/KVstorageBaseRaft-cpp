@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <algorithm>  // 包含 std::generate_n() 和 std::generate() 函数的头文件
 #include <functional>
+#include <mutex>
 #include <iostream>
 #include <map>
 #include <random>  // 包含 std::uniform_int_distribution 类型的头文件
@@ -27,6 +28,8 @@ class MprpcChannel : public google::protobuf::RpcChannel {
 
  private:
   int m_clientFd;
+  // 一条连接上同一时刻只能有一个请求在途（响应没有请求号），多线程调用必须串行化
+  std::mutex m_callMtx;
   const std::string m_ip;  //保存ip和端口，如果断了可以尝试重连
   const uint16_t m_port;
   /// @brief 连接ip和端口,并设置m_clientFd
@@ -34,6 +37,10 @@ class MprpcChannel : public google::protobuf::RpcChannel {
   /// @param port 端口，本机字节序
   /// @return 成功返回空字符串，否则返回失败信息
   bool newConnect(const char *ip, uint16_t port, string *errMsg);
+  void closeConnection();
+  // 循环 send / recv 直到收发完 len 字节；失败返回 false
+  bool sendAll(const char *data, size_t len);
+  bool recvAll(char *data, size_t len);
 };
 
 #endif  // MPRPCCHANNEL_H

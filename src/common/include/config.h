@@ -16,6 +16,9 @@ const int maxRandomizedElectionTime = 500 * debugMul;  // ms
 
 const int CONSENSUS_TIMEOUT = 500 * debugMul;  // ms
 
+// leader 收到新命令后是否立即向 follower 复制，而不是等下一次心跳（对比测试时可关闭）
+const bool REPLICATE_ON_START = true;
+
 // 持久化时是否 fsync。关掉后重启仍能恢复，但机器断电可能丢数据，仅用于对比测试性能
 const bool PERSIST_FSYNC = true;
 

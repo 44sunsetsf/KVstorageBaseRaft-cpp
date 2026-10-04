@@ -18,7 +18,7 @@ trap cleanup EXIT
 
 start_cluster() {
   : > "$LOG"
-  ./raftCoreRun -n 3 -f "$CONF" >> "$LOG" 2>&1 &
+  ./raftCoreRun -n 3 ${RAFT_ARGS:-} -f "$CONF" >> "$LOG" 2>&1 &
   PARENT=$!
   # 节点启动时会等待互相连接，之后选出 leader
   for _ in $(seq 1 60); do

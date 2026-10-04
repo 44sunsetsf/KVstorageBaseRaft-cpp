@@ -14,3 +14,6 @@ target_link_libraries(callerMain skip_list_on_raft  protobuf boost_serialization
 
 add_executable(kvcli ${src_raftClerk} kvcli.cpp ${src_common})
 target_link_libraries(kvcli skip_list_on_raft protobuf boost_serialization)
+
+add_executable(kvbench ${src_raftClerk} kvbench.cpp ${src_common})
+target_link_libraries(kvbench skip_list_on_raft protobuf boost_serialization)

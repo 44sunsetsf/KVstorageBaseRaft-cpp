@@ -4,6 +4,7 @@
 #include <boost/serialization/string.hpp>
 #include <boost/serialization/vector.hpp>
 #include <chrono>
+#include <condition_variable>
 #include <cmath>
 #include <iostream>
 #include <memory>
@@ -69,6 +70,16 @@ class Raft : public raftRpcProctoc::raftRpc {
   // 协程
   std::unique_ptr<monsoon::IOManager> m_ioManager = nullptr;
 
+  // 新命令到达后唤醒复制线程。多个命令在一轮复制期间到达时只会触发一次后续复制，天然合并成一个批次
+  std::mutex m_replMtx;
+  std::condition_variable m_replCv;
+  bool m_replPending = false;
+
+  // commitIndex 推进后唤醒 applier，让已提交的命令马上交给状态机，而不是等到下一个轮询周期
+  std::mutex m_applyMtx;
+  std::condition_variable m_applyCv;
+  bool m_applyPending = false;
+
  public:
   void AppendEntries1(const raftRpcProctoc::AppendEntriesArgs *args, raftRpcProctoc::AppendEntriesReply *reply);
   void applierTicker();
@@ -88,6 +99,9 @@ class Raft : public raftRpcProctoc::raftRpc {
   void InstallSnapshot(const raftRpcProctoc::InstallSnapshotRequest *args,
                        raftRpcProctoc::InstallSnapshotResponse *reply);
   void leaderHearBeatTicker();
+  void replicatorLoop();
+  void triggerReplication();
+  void notifyApplier();
   void leaderSendSnapShot(int server);
   void leaderUpdateCommitIndex();
   bool matchLog(int logIndex, int logTerm);

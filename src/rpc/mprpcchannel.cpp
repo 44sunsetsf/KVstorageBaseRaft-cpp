@@ -1,9 +1,12 @@
 #include "mprpcchannel.h"
 #include <arpa/inet.h>
 #include <netinet/in.h>
+#include <netinet/tcp.h>
+#include <sys/time.h>
 #include <sys/socket.h>
 #include <unistd.h>
 #include <cerrno>
+#include <cstring>
 #include <string>
 #include "mprpccontroller.h"
 #include "rpcheader.pb.h"
@@ -18,6 +21,7 @@ header_size + service_name method_name args_size + args
 void MprpcChannel::CallMethod(const google::protobuf::MethodDescriptor* method,
                               google::protobuf::RpcController* controller, const google::protobuf::Message* request,
                               google::protobuf::Message* response, google::protobuf::Closure* done) {
+  std::lock_guard<std::mutex> callLock(m_callMtx);
   if (m_clientFd == -1) {
     std::string errMsg;
     bool rt = newConnect(m_ip.c_str(), m_port, &errMsg);
@@ -54,74 +58,101 @@ void MprpcChannel::CallMethod(const google::protobuf::MethodDescriptor* method,
     return;
   }
 
-  // 使用protobuf的CodedOutputStream来构建发送的数据流
-  std::string send_rpc_str;  // 用来存储最终发送的数据
+  // 使用protobuf的CodedOutputStream来构建发送的数据流：varint32(header 长度) + header + args
+  std::string payload;
   {
-    // 创建一个StringOutputStream用于写入send_rpc_str
-    google::protobuf::io::StringOutputStream string_output(&send_rpc_str);
+    google::protobuf::io::StringOutputStream string_output(&payload);
     google::protobuf::io::CodedOutputStream coded_output(&string_output);
-
-    // 先写入header的长度（变长编码）
     coded_output.WriteVarint32(static_cast<uint32_t>(rpc_header_str.size()));
-
-    // 不需要手动写入header_size，因为上面的WriteVarint32已经包含了header的长度信息
-    // 然后写入rpc_header本身
     coded_output.WriteString(rpc_header_str);
   }
+  payload += args_str;
 
-  // 最后，将请求参数附加到send_rpc_str后面
-  send_rpc_str += args_str;
+  // 帧：uint32(网络字节序, payload 长度) + payload，服务端据此切分 TCP 字节流
+  const uint32_t netLen = htonl(static_cast<uint32_t>(payload.size()));
+  std::string frame(reinterpret_cast<const char*>(&netLen), sizeof(netLen));
+  frame += payload;
 
-  // 打印调试信息
-  //    std::cout << "============================================" << std::endl;
-  //    std::cout << "header_size: " << header_size << std::endl;
-  //    std::cout << "rpc_header_str: " << rpc_header_str << std::endl;
-  //    std::cout << "service_name: " << service_name << std::endl;
-  //    std::cout << "method_name: " << method_name << std::endl;
-  //    std::cout << "args_str: " << args_str << std::endl;
-  //    std::cout << "============================================" << std::endl;
-
-  // 发送rpc请求
-  //失败会重试连接再发送，重试连接失败会直接return
-  while (-1 == send(m_clientFd, send_rpc_str.c_str(), send_rpc_str.size(), 0)) {
-    char errtxt[512] = {0};
-    sprintf(errtxt, "send error! errno:%d", errno);
-    std::cout << "尝试重新连接，对方ip：" << m_ip << " 对方端口" << m_port << std::endl;
-    close(m_clientFd);
-    m_clientFd = -1;
+  // 发送rpc请求。连接可能已被对端关闭（节点重启等），发送失败时重连一次再发
+  if (!sendAll(frame.data(), frame.size())) {
+    DPrintf("[func-MprpcChannel::CallMethod]发送失败，尝试重新连接 ip：{%s} port{%d}", m_ip.c_str(), m_port);
+    closeConnection();
     std::string errMsg;
-    bool rt = newConnect(m_ip.c_str(), m_port, &errMsg);
-    if (!rt) {
-      controller->SetFailed(errMsg);
+    if (!newConnect(m_ip.c_str(), m_port, &errMsg) || !sendAll(frame.data(), frame.size())) {
+      closeConnection();
+      controller->SetFailed(errMsg.empty() ? std::string("send error!") : errMsg);
       return;
     }
   }
-  /*
-  从时间节点来说，这里将请求发送过去之后rpc服务的提供者就会开始处理，返回的时候就代表着已经返回响应了
-  */
 
-  // 接收rpc请求的响应值
-  char recv_buf[1024] = {0};
-  int recv_size = 0;
-  if (-1 == (recv_size = recv(m_clientFd, recv_buf, 1024, 0))) {
-    close(m_clientFd);
-    m_clientFd = -1;
+  // 接收响应：先收 4 字节长度，再收满 payload（不再受限于一次 recv 的 1KB 缓冲区）
+  uint32_t respNetLen = 0;
+  if (!recvAll(reinterpret_cast<char*>(&respNetLen), sizeof(respNetLen))) {
     char errtxt[512] = {0};
     sprintf(errtxt, "recv error! errno:%d", errno);
+    closeConnection();
+    controller->SetFailed(errtxt);
+    return;
+  }
+  std::string respBuf(ntohl(respNetLen), '\0');
+  if (!recvAll(&respBuf[0], respBuf.size())) {
+    char errtxt[512] = {0};
+    sprintf(errtxt, "recv error! errno:%d", errno);
+    closeConnection();
     controller->SetFailed(errtxt);
     return;
   }
 
-  // 反序列化rpc调用的响应数据
-  // std::string response_str(recv_buf, 0, recv_size); //
-  // bug：出现问题，recv_buf中遇到\0后面的数据就存不下来了，导致反序列化失败 if
-  // (!response->ParseFromString(response_str))
-  if (!response->ParseFromArray(recv_buf, recv_size)) {
-    char errtxt[1050] = {0};
-    sprintf(errtxt, "parse error! response_str:%s", recv_buf);
-    controller->SetFailed(errtxt);
+  if (!response->ParseFromString(respBuf)) {
+    controller->SetFailed("parse error! bad response");
+    closeConnection();  // 流可能已错位，丢弃这条连接
     return;
   }
+}
+
+void MprpcChannel::closeConnection() {
+  if (m_clientFd != -1) {
+    close(m_clientFd);
+    m_clientFd = -1;
+  }
+}
+
+bool MprpcChannel::sendAll(const char* data, size_t len) {
+  if (m_clientFd == -1) {
+    return false;
+  }
+  size_t sent = 0;
+  while (sent < len) {
+    // MSG_NOSIGNAL：对端已关闭时返回 EPIPE，而不是让整个进程收到 SIGPIPE 被杀掉
+    ssize_t n = send(m_clientFd, data + sent, len - sent, MSG_NOSIGNAL);
+    if (n < 0) {
+      if (errno == EINTR) {
+        continue;
+      }
+      return false;
+    }
+    sent += static_cast<size_t>(n);
+  }
+  return true;
+}
+
+bool MprpcChannel::recvAll(char* data, size_t len) {
+  size_t got = 0;
+  while (got < len) {
+    ssize_t n = recv(m_clientFd, data + got, len - got, 0);
+    if (n == 0) {
+      errno = ECONNRESET;  // 对端关闭
+      return false;
+    }
+    if (n < 0) {
+      if (errno == EINTR) {
+        continue;
+      }
+      return false;  // 包括 SO_RCVTIMEO 超时（EAGAIN）
+    }
+    got += static_cast<size_t>(n);
+  }
+  return true;
 }
 
 bool MprpcChannel::newConnect(const char* ip, uint16_t port, string* errMsg) {
@@ -147,6 +178,13 @@ bool MprpcChannel::newConnect(const char* ip, uint16_t port, string* errMsg) {
     *errMsg = errtxt;
     return false;
   }
+  // 超时保护：对端卡死时不会让调用线程永远阻塞；关闭 Nagle，小包请求/响应不再等待合并
+  struct timeval tv;
+  tv.tv_sec = 3;
+  tv.tv_usec = 0;
+  setsockopt(clientfd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
+  int one = 1;
+  setsockopt(clientfd, IPPROTO_TCP, TCP_NODELAY, &one, sizeof(one));
   m_clientFd = clientfd;
   return true;
 }

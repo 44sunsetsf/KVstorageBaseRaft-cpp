@@ -108,6 +108,7 @@ void Raft::AppendEntries1(const raftRpcProctoc::AppendEntriesArgs* args, raftRpc
     // }
     if (args->leadercommit() > m_commitIndex) {
       m_commitIndex = std::min(args->leadercommit(), getLastLogIndex());
+      notifyApplier();
       // 这个地方不能无脑跟上getLastLogIndex()，因为可能存在args->leadercommit()落后于 getLastLogIndex()的情况
     }
 
@@ -169,8 +170,10 @@ void Raft::applierTicker() {
     for (auto& message : applyMsgs) {
       applyChan->Push(message);
     }
-    // usleep(1000 * ApplyInterval);
-    sleepNMilliseconds(ApplyInterval);
+    // commitIndex 推进时会被立即唤醒；ApplyInterval 只是兜底（比如快照安装后）
+    std::unique_lock<std::mutex> lk(m_applyMtx);
+    m_applyCv.wait_for(lk, std::chrono::milliseconds(ApplyInterval), [this] { return m_applyPending; });
+    m_applyPending = false;
   }
 }
 
@@ -477,6 +480,35 @@ void Raft::InstallSnapshot(const raftRpcProctoc::InstallSnapshotRequest* args,
 
 void Raft::pushMsgToKvServer(ApplyMsg msg) { applyChan->Push(msg); }
 
+void Raft::notifyApplier() {
+  {
+    std::lock_guard<std::mutex> lg(m_applyMtx);
+    m_applyPending = true;
+  }
+  m_applyCv.notify_one();
+}
+
+void Raft::triggerReplication() {
+  {
+    std::lock_guard<std::mutex> lg(m_replMtx);
+    m_replPending = true;
+  }
+  m_replCv.notify_one();
+}
+
+// 单独的复制线程：被 Start() 唤醒后做一轮 AppendEntries。
+// doHeartBeat 内部会检查自己是不是 leader，所以非 leader 时唤醒也是无害的。
+void Raft::replicatorLoop() {
+  while (true) {
+    {
+      std::unique_lock<std::mutex> lk(m_replMtx);
+      m_replCv.wait(lk, [this] { return m_replPending; });
+      m_replPending = false;
+    }
+    doHeartBeat();
+  }
+}
+
 void Raft::leaderHearBeatTicker() {
   while (true) {
     //不是leader的话就没有必要进行后续操作，况且还要拿锁，很影响性能，目前是睡眠，后面再优化优化
@@ -580,6 +612,7 @@ void Raft::leaderUpdateCommitIndex() {
     // rf.getLastIndex())
     if (sum >= m_peers.size() / 2 + 1 && getLogTermFromLogIndex(index) == m_currentTerm) {
       m_commitIndex = index;
+      notifyApplier();
       break;
     }
   }
@@ -912,6 +945,7 @@ bool Raft::sendAppendEntries(int server, std::shared_ptr<raftRpcProctoc::AppendE
             m_commitIndex, args->prevlogindex() + args->entries_size());
 
         m_commitIndex = std::max(m_commitIndex, args->prevlogindex() + args->entries_size());
+        notifyApplier();
       }
       myAssert(m_commitIndex <= lastLogIndex,
                format("[func-sendAppendEntries,rf{%d}] lastLogIndex:%d  rf.commitIndex:%d\n", m_me, lastLogIndex,
@@ -966,10 +1000,12 @@ void Raft::Start(Op command, int* newLogIndex, int* newLogTerm, bool* isLeader) 
 
   int lastLogIndex = getLastLogIndex();
 
-  // leader应该不停的向各个Follower发送AE来维护心跳和保持日志同步，目前的做法是新的命令来了不会直接执行，而是等待leader的心跳触发
   DPrintf("[func-Start-rf{%d}]  lastLogIndex:%d,command:%s\n", m_me, lastLogIndex, &command);
-  // rf.timer.Reset(10) //接收到命令后马上给follower发送,改成这样不知为何会出现问题，待修正 todo
   persist();
+  // 新命令不再等下一次心跳，而是唤醒复制线程马上发给 follower
+  if (REPLICATE_ON_START) {
+    triggerReplication();
+  }
   *newLogIndex = newLogEntry.logindex();
   *newLogTerm = newLogEntry.logterm();
   *isLeader = true;
@@ -1036,6 +1072,9 @@ void Raft::init(std::vector<std::shared_ptr<RaftRpcUtil>> peers, int me, std::sh
 
   std::thread t3(&Raft::applierTicker, this);
   t3.detach();
+
+  std::thread t4(&Raft::replicatorLoop, this);
+  t4.detach();
 
   // std::thread t(&Raft::leaderHearBeatTicker, this);
   // t.detach();

@@ -19,18 +19,22 @@ int main(int argc, char **argv) {
   }
   int c = 0;
   int nodeNum = 0;
+  int maxRaftState = 1 << 20;  // raft 日志超过它的 1/10 就做一次快照
   std::string configFileName;
   std::random_device rd;
   std::mt19937 gen(rd());
   std::uniform_int_distribution<> dis(10000, 29999);
   unsigned short startPort = dis(gen);
-  while ((c = getopt(argc, argv, "n:f:")) != -1) {
+  while ((c = getopt(argc, argv, "n:f:m:")) != -1) {
     switch (c) {
       case 'n':
         nodeNum = atoi(optarg);
         break;
       case 'f':
         configFileName = optarg;
+        break;
+      case 'm':
+        maxRaftState = atoi(optarg);
         break;
       default:
         ShowArgsHelp();
@@ -55,7 +59,7 @@ int main(int argc, char **argv) {
       // 如果是子进程
       // 子进程的代码
 
-      auto kvServer = new KvServer(i, 500, configFileName, port);
+      auto kvServer = new KvServer(i, maxRaftState, configFileName, port);
       pause();  // 子进程进入等待状态，不会执行 return 语句
     } else if (pid > 0) {
       // 如果是父进程
@@ -71,4 +75,4 @@ int main(int argc, char **argv) {
   return 0;
 }
 
-void ShowArgsHelp() { std::cout << "format: command -n <nodeNum> -f <configFileName>" << std::endl; }
+void ShowArgsHelp() { std::cout << "format: command -n <nodeNum> -f <configFileName> [-m <maxRaftState>]" << std::endl; }

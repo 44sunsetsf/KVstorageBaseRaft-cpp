@@ -1,6 +1,7 @@
 #include "rpcprovider.h"
 #include <arpa/inet.h>
 #include <netdb.h>
+#include <netinet/in.h>
 #include <unistd.h>
 #include <cstring>
 #include <fstream>
@@ -109,7 +110,10 @@ void RpcProvider::Run(int nodeIndex, short port, const std::string &confFile) {
 
 // 新的socket连接回调
 void RpcProvider::OnConnection(const muduo::net::TcpConnectionPtr &conn) {
-  // 如果是新连接就什么都不干，即正常的接收连接即可
+  // 小包请求/响应不要等 Nagle 合并
+  if (conn->connected()) {
+    conn->setTcpNoDelay(true);
+  }
   if (!conn->connected()) {
     // 和rpc client的连接断开了
     conn->shutdown();
@@ -130,9 +134,23 @@ std::string   insert和copy方法
 // 已建立连接用户的读写事件回调 如果远程有一个rpc服务的调用请求，那么OnMessage方法就会响应
 // 这里来的肯定是一个远程调用请求
 // 因此本函数需要：解析请求，根据服务名，方法名，参数，来调用service的来callmethod来调用本地的业务
+// 帧格式：uint32(网络字节序, 后续字节数) + varint32(header 长度) + RpcHeader + args。
+// TCP 是字节流，一次回调里可能只有半个请求，也可能有好几个请求，所以按长度前缀切帧。
 void RpcProvider::OnMessage(const muduo::net::TcpConnectionPtr &conn, muduo::net::Buffer *buffer, muduo::Timestamp) {
-  // 网络上接收的远程rpc调用请求的字符流    Login args
-  std::string recv_buf = buffer->retrieveAllAsString();
+  while (buffer->readableBytes() >= sizeof(uint32_t)) {
+    uint32_t netLen = 0;
+    ::memcpy(&netLen, buffer->peek(), sizeof(netLen));
+    const size_t frameLen = ntohl(netLen);
+    if (buffer->readableBytes() < sizeof(uint32_t) + frameLen) {
+      break;  // 还没收全，等下一次回调
+    }
+    buffer->retrieve(sizeof(uint32_t));
+    std::string frame = buffer->retrieveAsString(frameLen);
+    DispatchRequest(conn, frame);
+  }
+}
+
+void RpcProvider::DispatchRequest(const muduo::net::TcpConnectionPtr &conn, const std::string &recv_buf) {
 
   // 使用protobuf的CodedInputStream来解析数据流
   google::protobuf::io::ArrayInputStream array_input(recv_buf.data(), recv_buf.size());
@@ -232,6 +250,7 @@ void RpcProvider::OnMessage(const muduo::net::TcpConnectionPtr &conn, muduo::net
   */
   //真正调用方法
   service->CallMethod(method, nullptr, request, response, done);
+  delete request;  // 服务方法都是同步调用 done->Run()，返回后 request 不再被使用
 }
 
 // Closure的回调操作，用于序列化rpc的响应和网络发送,发送响应回去
@@ -239,11 +258,15 @@ void RpcProvider::SendRpcResponse(const muduo::net::TcpConnectionPtr &conn, goog
   std::string response_str;
   if (response->SerializeToString(&response_str))  // response进行序列化
   {
-    // 序列化成功后，通过网络把rpc方法执行的结果发送会rpc的调用方
-    conn->send(response_str);
+    // 序列化成功后，通过网络把rpc方法执行的结果发送会rpc的调用方（加上长度前缀，客户端据此收满整个响应）
+    const uint32_t netLen = htonl(static_cast<uint32_t>(response_str.size()));
+    std::string frame(reinterpret_cast<const char *>(&netLen), sizeof(netLen));
+    frame += response_str;
+    conn->send(frame);
   } else {
     std::cout << "serialize response_str error!" << std::endl;
   }
+  delete response;
   //    conn->shutdown(); // 模拟http的短链接服务，由rpcprovider主动断开连接  //改为长连接，不主动断开
 }
 
