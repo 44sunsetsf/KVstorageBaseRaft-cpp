@@ -145,9 +145,9 @@ button, input { font: inherit; color: inherit; }
 .tape-label span { color: var(--ink-3); font-size: 12px; }
 .tape-label .r-leader { color: var(--ink); font-weight: 700; }
 .cells { display: flex; gap: 4px; justify-content: flex-end; min-height: 32px; overflow: hidden; }
-.cell { flex: 0 0 auto; width: 30px; height: 32px; border-radius: 5px; border: 2px solid var(--tc); color: var(--tc); font: 600 11px var(--mono); display: grid; place-items: center; background: var(--sheet); }
+.cell { flex: 0 1 30px; min-width: 0; overflow: hidden; height: 32px; border-radius: 5px; border: 2px solid var(--tc); color: var(--tc); font: 600 11px var(--mono); display: grid; place-items: center; background: var(--sheet); }
 .cell.done { background: var(--tc); color: #fff; }
-.cell.snap { width: auto; padding: 0 7px; border-style: dashed; border-color: var(--ink-3); color: var(--ink-3); background: transparent; font-weight: 500; }
+.cell.snap { flex: 0 0 auto; padding: 0 7px; border-style: dashed; border-color: var(--ink-3); color: var(--ink-3); background: transparent; font-weight: 500; }
 .cells .empty { color: var(--ink-3); font-size: 13px; align-self: center; }
 .tape.off .cells { opacity: 0.35; filter: grayscale(1); }
 .tape.off .tape-label b { color: var(--ink-3); }
@@ -236,7 +236,6 @@ button, input { font: inherit; color: inherit; }
   .board .panel-head { margin: -16px -14px 0; padding: 16px 14px 12px; }
   .bar { grid-template-columns: 78px minmax(0, 1fr) 64px; }
   .tape { grid-template-columns: 58px minmax(0, 1fr); }
-  .cell { width: 26px; }
 }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }

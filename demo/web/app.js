@@ -142,7 +142,9 @@ const store = {
   get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
   set(k, v) { try { localStorage.setItem(k, v); } catch (e) { /* private mode: ignore */ } },
 };
-let lang = store.get("lang") || ((navigator.language || "en").toLowerCase().startsWith("zh") ? "zh" : "en");
+// ?lang=en / ?lang=zh in the link wins, then the saved choice, then the browser language
+const queryLang = new URLSearchParams(location.search).get("lang");
+let lang = (queryLang in I18N ? queryLang : null) || store.get("lang") || ((navigator.language || "en").toLowerCase().startsWith("zh") ? "zh" : "en");
 
 function t(key, params = {}) {
   const s = (I18N[lang][key] ?? I18N.en[key] ?? key);
