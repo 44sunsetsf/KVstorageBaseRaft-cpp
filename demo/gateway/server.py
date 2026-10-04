@@ -19,7 +19,7 @@ PORT = int(os.environ.get("PORT", "8000"))
 MAX_KEYS = int(os.environ.get("MAX_KEYS", "300"))
 MAX_KEY_LEN, MAX_VALUE_LEN = 32, 64
 
-cluster = Cluster(NODE_BIN, DATA_DIR, size=SIZE, max_raft_state=int(os.environ.get("MAX_RAFT_STATE", "8000")))
+cluster = Cluster(NODE_BIN, DATA_DIR, size=SIZE, max_raft_state=int(os.environ.get("MAX_RAFT_STATE", "24000")))
 client = KVClient(cluster.addrs, pool_size=8)
 _bench_lock = threading.Lock()
 

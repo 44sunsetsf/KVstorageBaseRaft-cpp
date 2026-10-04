@@ -1,0 +1,8 @@
+# 复制到 GoEuroOps 的 deploy/sites/raft.caddy 后 reload Caddy（deploy.sh 第一次部署时会自动做）。
+# {$SITE_ADDRESS} 由 GoEuroOps 的 Caddy 容器环境变量提供；access_log 片段定义在 GoEuroOps 的 Caddyfile 里。
+# 演示本身公开可玩，滥用由网关里的限流和数据量上限兜底，所以这里不加口令。
+raft.{$SITE_ADDRESS} {
+	encode zstd gzip
+	import access_log raft
+	reverse_proxy raft-playground:8000
+}

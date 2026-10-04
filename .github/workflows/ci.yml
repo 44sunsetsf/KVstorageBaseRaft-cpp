@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Syntax checks
+        run: |
+          node --check demo/web/app.js
+          python3 -m py_compile demo/gateway/*.py demo/tests/e2e.py
+          bash -n demo/deploy/deploy.sh scripts/*.sh
+
+      - uses: docker/setup-buildx-action@v3
+
+      # Builds muduo and the C++ nodes inside the image, so this also proves the project compiles from scratch.
+      - name: Build image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: demo/Dockerfile
+          load: true
+          tags: raft-playground:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Start the cluster
+        run: |
+          docker run -d --name playground -p 8000:8000 raft-playground:ci
+          for i in $(seq 1 60); do curl -sf localhost:8000/api/healthz && break; sleep 1; done
+          curl -sf localhost:8000/api/healthz
+
+      # Writes keys, kills the leader, kills every node, restarts them, and checks that nothing was lost.
+      - name: End-to-end failover test
+        run: python3 demo/tests/e2e.py http://localhost:8000
+
+      - name: Container logs
+        if: failure()
+        run: docker logs --tail 100 playground

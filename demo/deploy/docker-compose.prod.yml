@@ -1,0 +1,30 @@
+# 与 GoEuroOps、Vparser 共用一台 2 vCPU / 1.6 GiB 的演示服务器。镜像在本机构建后传上去，服务器上不构建：
+#   docker compose -f demo/deploy/docker-compose.prod.yml up -d --no-build
+# 实测整个容器（5 个 Raft 节点 + 网关）常驻内存约 30 MB，空闲 CPU 约 5%，这里给 128 MB 和半个核的上限。
+# 对外只经 GoEuroOps 的 Caddy（HTTPS）：容器接入 goeuroops_default 网络，不映射宿主机端口。
+services:
+  raft-demo:
+    image: raft-playground:latest
+    container_name: raft-playground
+    restart: unless-stopped
+    mem_limit: 128m
+    memswap_limit: 128m   # 不允许占用 swap，机器的 swap 已经在被用了
+    cpus: 0.5
+    pids_limit: 200
+    volumes:
+      - raft-data:/data
+    networks:
+      - edge
+    logging:
+      driver: json-file
+      options:
+        max-size: "5m"
+        max-file: "2"
+
+networks:
+  edge:
+    external: true
+    name: goeuroops_default
+
+volumes:
+  raft-data:
