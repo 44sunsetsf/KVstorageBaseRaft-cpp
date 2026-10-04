@@ -1,0 +1,9 @@
+.git
+bin
+lib
+build
+cmake-build-debug
+docs
+demo/web/fonts/*.txt
+**/._*
+**/.DS_Store

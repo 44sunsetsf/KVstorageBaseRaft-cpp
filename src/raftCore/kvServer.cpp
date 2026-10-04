@@ -23,13 +23,13 @@ void KvServer::ExecuteAppendOpOnKVDB(Op op) {
   // }
   m_mtx.lock();
 
-  m_skipList.insert_set_element(op.Key, op.Value);
-
-  // if (m_kvDB.find(op.Key) != m_kvDB.end()) {
-  //     m_kvDB[op.Key] = m_kvDB[op.Key] + op.Value;
-  // } else {
-  //     m_kvDB.insert(std::make_pair(op.Key, op.Value));
-  // }
+  // Append：key 已存在就拼接在旧值后面，不存在就等同于 Put（之前这里直接覆盖，和 Put 没有区别）
+  std::string oldValue;
+  std::string newValue = op.Value;
+  if (m_skipList.search_element(op.Key, oldValue)) {
+    newValue = oldValue + op.Value;
+  }
+  m_skipList.insert_set_element(op.Key, newValue);
   m_lastRequestId[op.ClientId] = op.RequestId;
   m_mtx.unlock();
 
@@ -374,6 +374,50 @@ void KvServer::Get(google::protobuf::RpcController *controller, const ::raftKVRp
   done->Run();
 }
 
+void KvServer::Status(const raftKVRpcProctoc::StatusArgs *args, raftKVRpcProctoc::StatusReply *reply) {
+  RaftStatus st;
+  m_raftNode->GetStatus(&st, 12);
+  reply->set_nodeid(m_me);
+  reply->set_role(st.role);
+  reply->set_term(st.term);
+  reply->set_votedfor(st.votedFor);
+  reply->set_commitindex(st.commitIndex);
+  reply->set_lastapplied(st.lastApplied);
+  reply->set_lastlogindex(st.lastLogIndex);
+  reply->set_snapshotindex(st.snapshotIndex);
+  reply->set_raftstatebytes(st.raftStateBytes);
+  reply->set_kvcount(m_skipList.size());
+  for (const auto &e : st.tail) {
+    auto *b = reply->add_tail();
+    b->set_index(e.index);
+    b->set_term(e.term);
+    std::string summary;
+    try {
+      Op op;
+      op.parseFromString(e.command);
+      if (op.Operation == "Put") {
+        summary = "Put " + op.Key + "=" + op.Value;
+      } else if (op.Operation == "Append") {
+        summary = "Append " + op.Key + "+=" + op.Value;
+      } else {
+        summary = op.Operation + " " + op.Key;
+      }
+    } catch (...) {
+      summary = "?";
+    }
+    if (summary.size() > 48) {
+      summary.resize(48);
+    }
+    b->set_summary(summary);
+  }
+}
+
+void KvServer::Status(google::protobuf::RpcController *controller, const ::raftKVRpcProctoc::StatusArgs *request,
+                      ::raftKVRpcProctoc::StatusReply *response, ::google::protobuf::Closure *done) {
+  KvServer::Status(request, response);
+  done->Run();
+}
+
 KvServer::KvServer(int me, int maxraftstate, std::string nodeInforFileName, short port) : m_skipList(6) {
   std::shared_ptr<Persister> persister = std::make_shared<Persister>(me);
 
@@ -415,6 +459,38 @@ KvServer::KvServer(int me, int maxraftstate, std::string nodeInforFileName, shor
     }
     ipPortVt.emplace_back(nodeIp, atoi(nodePortStr.c_str()));  //沒有atos方法，可以考慮自己实现
   }
+  connectAndRun(ipPortVt, persister, true, nullptr);
+}
+
+// 不依赖配置文件的构造方式：peers 是整个集群（含自己）的地址，按节点编号排列。
+// 不做启动等待——对端还没起来也没关系，RPC 通道会在第一次调用时重连，因此单个节点可以随时重启。
+KvServer::KvServer(int me, int maxraftstate, const std::vector<std::pair<std::string, short> > &peers, short port,
+                   const std::string &bindIp)
+    : m_skipList(6) {
+  std::shared_ptr<Persister> persister = std::make_shared<Persister>(me);
+
+  m_me = me;
+  m_maxRaftState = maxraftstate;
+  applyChan = std::make_shared<LockQueue<ApplyMsg> >();
+  m_raftNode = std::make_shared<Raft>();
+
+  // 等 raft 初始化完成后再开始监听，避免对端的请求碰到还没初始化的状态
+  auto startListening = [this, port, bindIp]() {
+    std::thread t([this, port, bindIp]() -> void {
+      RpcProvider provider;
+      provider.NotifyService(this);
+      provider.NotifyService(this->m_raftNode.get());
+      provider.Run(m_me, port, "", bindIp);
+    });
+    t.detach();
+  };
+
+  connectAndRun(peers, persister, false, startListening);
+}
+
+void KvServer::connectAndRun(const std::vector<std::pair<std::string, short> > &ipPortVt,
+                             std::shared_ptr<Persister> persister, bool staggeredStart,
+                             const std::function<void()> &afterRaftInit) {
   std::vector<std::shared_ptr<RaftRpcUtil> > servers;
   //进行连接
   for (int i = 0; i < ipPortVt.size(); ++i) {
@@ -429,8 +505,13 @@ KvServer::KvServer(int me, int maxraftstate, std::string nodeInforFileName, shor
 
     std::cout << "node" << m_me << " 连接node" << i << "success!" << std::endl;
   }
-  sleep(ipPortVt.size() - me);  //等待所有节点相互连接成功，再启动raft
+  if (staggeredStart) {
+    sleep(ipPortVt.size() - m_me);  //等待所有节点相互连接成功，再启动raft
+  }
   m_raftNode->init(servers, m_me, persister, applyChan);
+  if (afterRaftInit) {
+    afterRaftInit();
+  }
   // kv的server直接与raft通信，但kv不直接与raft通信，所以需要把ApplyMsg的chan传递下去用于通信，两者的persist也是共用的
 
   //////////////////////////////////

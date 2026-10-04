@@ -48,7 +48,7 @@ struct TableStruct_kvServerRPC_2eproto {
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::AuxillaryParseTableField aux[]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
-  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[4]
+  static const ::PROTOBUF_NAMESPACE_ID::internal::ParseTable schema[7]
     PROTOBUF_SECTION_VARIABLE(protodesc_cold);
   static const ::PROTOBUF_NAMESPACE_ID::internal::FieldMetadata field_metadata[];
   static const ::PROTOBUF_NAMESPACE_ID::internal::SerializationTable serialization_table[];
@@ -62,18 +62,30 @@ extern GetArgsDefaultTypeInternal _GetArgs_default_instance_;
 class GetReply;
 class GetReplyDefaultTypeInternal;
 extern GetReplyDefaultTypeInternal _GetReply_default_instance_;
+class LogBrief;
+class LogBriefDefaultTypeInternal;
+extern LogBriefDefaultTypeInternal _LogBrief_default_instance_;
 class PutAppendArgs;
 class PutAppendArgsDefaultTypeInternal;
 extern PutAppendArgsDefaultTypeInternal _PutAppendArgs_default_instance_;
 class PutAppendReply;
 class PutAppendReplyDefaultTypeInternal;
 extern PutAppendReplyDefaultTypeInternal _PutAppendReply_default_instance_;
+class StatusArgs;
+class StatusArgsDefaultTypeInternal;
+extern StatusArgsDefaultTypeInternal _StatusArgs_default_instance_;
+class StatusReply;
+class StatusReplyDefaultTypeInternal;
+extern StatusReplyDefaultTypeInternal _StatusReply_default_instance_;
 }  // namespace raftKVRpcProctoc
 PROTOBUF_NAMESPACE_OPEN
 template<> ::raftKVRpcProctoc::GetArgs* Arena::CreateMaybeMessage<::raftKVRpcProctoc::GetArgs>(Arena*);
 template<> ::raftKVRpcProctoc::GetReply* Arena::CreateMaybeMessage<::raftKVRpcProctoc::GetReply>(Arena*);
+template<> ::raftKVRpcProctoc::LogBrief* Arena::CreateMaybeMessage<::raftKVRpcProctoc::LogBrief>(Arena*);
 template<> ::raftKVRpcProctoc::PutAppendArgs* Arena::CreateMaybeMessage<::raftKVRpcProctoc::PutAppendArgs>(Arena*);
 template<> ::raftKVRpcProctoc::PutAppendReply* Arena::CreateMaybeMessage<::raftKVRpcProctoc::PutAppendReply>(Arena*);
+template<> ::raftKVRpcProctoc::StatusArgs* Arena::CreateMaybeMessage<::raftKVRpcProctoc::StatusArgs>(Arena*);
+template<> ::raftKVRpcProctoc::StatusReply* Arena::CreateMaybeMessage<::raftKVRpcProctoc::StatusReply>(Arena*);
 PROTOBUF_NAMESPACE_CLOSE
 namespace raftKVRpcProctoc {
 
@@ -846,6 +858,561 @@ class PutAppendReply PROTOBUF_FINAL :
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   friend struct ::TableStruct_kvServerRPC_2eproto;
 };
+// -------------------------------------------------------------------
+
+class StatusArgs PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:raftKVRpcProctoc.StatusArgs) */ {
+ public:
+  inline StatusArgs() : StatusArgs(nullptr) {};
+  virtual ~StatusArgs();
+
+  StatusArgs(const StatusArgs& from);
+  StatusArgs(StatusArgs&& from) noexcept
+    : StatusArgs() {
+    *this = ::std::move(from);
+  }
+
+  inline StatusArgs& operator=(const StatusArgs& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline StatusArgs& operator=(StatusArgs&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const StatusArgs& default_instance();
+
+  static void InitAsDefaultInstance();  // FOR INTERNAL USE ONLY
+  static inline const StatusArgs* internal_default_instance() {
+    return reinterpret_cast<const StatusArgs*>(
+               &_StatusArgs_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    4;
+
+  friend void swap(StatusArgs& a, StatusArgs& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(StatusArgs* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(StatusArgs* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline StatusArgs* New() const final {
+    return CreateMaybeMessage<StatusArgs>(nullptr);
+  }
+
+  StatusArgs* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<StatusArgs>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const StatusArgs& from);
+  void MergeFrom(const StatusArgs& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(StatusArgs* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "raftKVRpcProctoc.StatusArgs";
+  }
+  protected:
+  explicit StatusArgs(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&::descriptor_table_kvServerRPC_2eproto);
+    return ::descriptor_table_kvServerRPC_2eproto.file_level_metadata[kIndexInFileMessages];
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // @@protoc_insertion_point(class_scope:raftKVRpcProctoc.StatusArgs)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_kvServerRPC_2eproto;
+};
+// -------------------------------------------------------------------
+
+class LogBrief PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:raftKVRpcProctoc.LogBrief) */ {
+ public:
+  inline LogBrief() : LogBrief(nullptr) {};
+  virtual ~LogBrief();
+
+  LogBrief(const LogBrief& from);
+  LogBrief(LogBrief&& from) noexcept
+    : LogBrief() {
+    *this = ::std::move(from);
+  }
+
+  inline LogBrief& operator=(const LogBrief& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline LogBrief& operator=(LogBrief&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const LogBrief& default_instance();
+
+  static void InitAsDefaultInstance();  // FOR INTERNAL USE ONLY
+  static inline const LogBrief* internal_default_instance() {
+    return reinterpret_cast<const LogBrief*>(
+               &_LogBrief_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    5;
+
+  friend void swap(LogBrief& a, LogBrief& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(LogBrief* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(LogBrief* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline LogBrief* New() const final {
+    return CreateMaybeMessage<LogBrief>(nullptr);
+  }
+
+  LogBrief* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<LogBrief>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const LogBrief& from);
+  void MergeFrom(const LogBrief& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(LogBrief* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "raftKVRpcProctoc.LogBrief";
+  }
+  protected:
+  explicit LogBrief(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&::descriptor_table_kvServerRPC_2eproto);
+    return ::descriptor_table_kvServerRPC_2eproto.file_level_metadata[kIndexInFileMessages];
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kSummaryFieldNumber = 3,
+    kIndexFieldNumber = 1,
+    kTermFieldNumber = 2,
+  };
+  // bytes Summary = 3;
+  void clear_summary();
+  const std::string& summary() const;
+  void set_summary(const std::string& value);
+  void set_summary(std::string&& value);
+  void set_summary(const char* value);
+  void set_summary(const void* value, size_t size);
+  std::string* mutable_summary();
+  std::string* release_summary();
+  void set_allocated_summary(std::string* summary);
+  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
+  "    string fields are deprecated and will be removed in a"
+  "    future release.")
+  std::string* unsafe_arena_release_summary();
+  GOOGLE_PROTOBUF_RUNTIME_DEPRECATED("The unsafe_arena_ accessors for"
+  "    string fields are deprecated and will be removed in a"
+  "    future release.")
+  void unsafe_arena_set_allocated_summary(
+      std::string* summary);
+  private:
+  const std::string& _internal_summary() const;
+  void _internal_set_summary(const std::string& value);
+  std::string* _internal_mutable_summary();
+  public:
+
+  // int32 Index = 1;
+  void clear_index();
+  ::PROTOBUF_NAMESPACE_ID::int32 index() const;
+  void set_index(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_index() const;
+  void _internal_set_index(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // int32 Term = 2;
+  void clear_term();
+  ::PROTOBUF_NAMESPACE_ID::int32 term() const;
+  void set_term(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_term() const;
+  void _internal_set_term(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:raftKVRpcProctoc.LogBrief)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr summary_;
+  ::PROTOBUF_NAMESPACE_ID::int32 index_;
+  ::PROTOBUF_NAMESPACE_ID::int32 term_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_kvServerRPC_2eproto;
+};
+// -------------------------------------------------------------------
+
+class StatusReply PROTOBUF_FINAL :
+    public ::PROTOBUF_NAMESPACE_ID::Message /* @@protoc_insertion_point(class_definition:raftKVRpcProctoc.StatusReply) */ {
+ public:
+  inline StatusReply() : StatusReply(nullptr) {};
+  virtual ~StatusReply();
+
+  StatusReply(const StatusReply& from);
+  StatusReply(StatusReply&& from) noexcept
+    : StatusReply() {
+    *this = ::std::move(from);
+  }
+
+  inline StatusReply& operator=(const StatusReply& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline StatusReply& operator=(StatusReply&& from) noexcept {
+    if (GetArena() == from.GetArena()) {
+      if (this != &from) InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Descriptor* GetDescriptor() {
+    return GetMetadataStatic().descriptor;
+  }
+  static const ::PROTOBUF_NAMESPACE_ID::Reflection* GetReflection() {
+    return GetMetadataStatic().reflection;
+  }
+  static const StatusReply& default_instance();
+
+  static void InitAsDefaultInstance();  // FOR INTERNAL USE ONLY
+  static inline const StatusReply* internal_default_instance() {
+    return reinterpret_cast<const StatusReply*>(
+               &_StatusReply_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages =
+    6;
+
+  friend void swap(StatusReply& a, StatusReply& b) {
+    a.Swap(&b);
+  }
+  inline void Swap(StatusReply* other) {
+    if (other == this) return;
+    if (GetArena() == other->GetArena()) {
+      InternalSwap(other);
+    } else {
+      ::PROTOBUF_NAMESPACE_ID::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(StatusReply* other) {
+    if (other == this) return;
+    GOOGLE_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  inline StatusReply* New() const final {
+    return CreateMaybeMessage<StatusReply>(nullptr);
+  }
+
+  StatusReply* New(::PROTOBUF_NAMESPACE_ID::Arena* arena) const final {
+    return CreateMaybeMessage<StatusReply>(arena);
+  }
+  void CopyFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void MergeFrom(const ::PROTOBUF_NAMESPACE_ID::Message& from) final;
+  void CopyFrom(const StatusReply& from);
+  void MergeFrom(const StatusReply& from);
+  PROTOBUF_ATTRIBUTE_REINITIALIZES void Clear() final;
+  bool IsInitialized() const final;
+
+  size_t ByteSizeLong() const final;
+  const char* _InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::internal::ParseContext* ctx) final;
+  ::PROTOBUF_NAMESPACE_ID::uint8* _InternalSerialize(
+      ::PROTOBUF_NAMESPACE_ID::uint8* target, ::PROTOBUF_NAMESPACE_ID::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const final { return _cached_size_.Get(); }
+
+  private:
+  inline void SharedCtor();
+  inline void SharedDtor();
+  void SetCachedSize(int size) const final;
+  void InternalSwap(StatusReply* other);
+  friend class ::PROTOBUF_NAMESPACE_ID::internal::AnyMetadata;
+  static ::PROTOBUF_NAMESPACE_ID::StringPiece FullMessageName() {
+    return "raftKVRpcProctoc.StatusReply";
+  }
+  protected:
+  explicit StatusReply(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  private:
+  static void ArenaDtor(void* object);
+  inline void RegisterArenaDtor(::PROTOBUF_NAMESPACE_ID::Arena* arena);
+  public:
+
+  ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadata() const final;
+  private:
+  static ::PROTOBUF_NAMESPACE_ID::Metadata GetMetadataStatic() {
+    ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&::descriptor_table_kvServerRPC_2eproto);
+    return ::descriptor_table_kvServerRPC_2eproto.file_level_metadata[kIndexInFileMessages];
+  }
+
+  public:
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  enum : int {
+    kTailFieldNumber = 11,
+    kNodeIdFieldNumber = 1,
+    kRoleFieldNumber = 2,
+    kTermFieldNumber = 3,
+    kVotedForFieldNumber = 4,
+    kCommitIndexFieldNumber = 5,
+    kLastAppliedFieldNumber = 6,
+    kLastLogIndexFieldNumber = 7,
+    kSnapshotIndexFieldNumber = 8,
+    kKvCountFieldNumber = 9,
+    kRaftStateBytesFieldNumber = 10,
+  };
+  // repeated .raftKVRpcProctoc.LogBrief Tail = 11;
+  int tail_size() const;
+  private:
+  int _internal_tail_size() const;
+  public:
+  void clear_tail();
+  ::raftKVRpcProctoc::LogBrief* mutable_tail(int index);
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::raftKVRpcProctoc::LogBrief >*
+      mutable_tail();
+  private:
+  const ::raftKVRpcProctoc::LogBrief& _internal_tail(int index) const;
+  ::raftKVRpcProctoc::LogBrief* _internal_add_tail();
+  public:
+  const ::raftKVRpcProctoc::LogBrief& tail(int index) const;
+  ::raftKVRpcProctoc::LogBrief* add_tail();
+  const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::raftKVRpcProctoc::LogBrief >&
+      tail() const;
+
+  // int32 NodeId = 1;
+  void clear_nodeid();
+  ::PROTOBUF_NAMESPACE_ID::int32 nodeid() const;
+  void set_nodeid(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_nodeid() const;
+  void _internal_set_nodeid(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // int32 Role = 2;
+  void clear_role();
+  ::PROTOBUF_NAMESPACE_ID::int32 role() const;
+  void set_role(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_role() const;
+  void _internal_set_role(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // int32 Term = 3;
+  void clear_term();
+  ::PROTOBUF_NAMESPACE_ID::int32 term() const;
+  void set_term(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_term() const;
+  void _internal_set_term(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // int32 VotedFor = 4;
+  void clear_votedfor();
+  ::PROTOBUF_NAMESPACE_ID::int32 votedfor() const;
+  void set_votedfor(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_votedfor() const;
+  void _internal_set_votedfor(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // int32 CommitIndex = 5;
+  void clear_commitindex();
+  ::PROTOBUF_NAMESPACE_ID::int32 commitindex() const;
+  void set_commitindex(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_commitindex() const;
+  void _internal_set_commitindex(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // int32 LastApplied = 6;
+  void clear_lastapplied();
+  ::PROTOBUF_NAMESPACE_ID::int32 lastapplied() const;
+  void set_lastapplied(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_lastapplied() const;
+  void _internal_set_lastapplied(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // int32 LastLogIndex = 7;
+  void clear_lastlogindex();
+  ::PROTOBUF_NAMESPACE_ID::int32 lastlogindex() const;
+  void set_lastlogindex(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_lastlogindex() const;
+  void _internal_set_lastlogindex(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // int32 SnapshotIndex = 8;
+  void clear_snapshotindex();
+  ::PROTOBUF_NAMESPACE_ID::int32 snapshotindex() const;
+  void set_snapshotindex(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_snapshotindex() const;
+  void _internal_set_snapshotindex(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // int32 KvCount = 9;
+  void clear_kvcount();
+  ::PROTOBUF_NAMESPACE_ID::int32 kvcount() const;
+  void set_kvcount(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_kvcount() const;
+  void _internal_set_kvcount(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // int32 RaftStateBytes = 10;
+  void clear_raftstatebytes();
+  ::PROTOBUF_NAMESPACE_ID::int32 raftstatebytes() const;
+  void set_raftstatebytes(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_raftstatebytes() const;
+  void _internal_set_raftstatebytes(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
+  // @@protoc_insertion_point(class_scope:raftKVRpcProctoc.StatusReply)
+ private:
+  class _Internal;
+
+  template <typename T> friend class ::PROTOBUF_NAMESPACE_ID::Arena::InternalHelper;
+  typedef void InternalArenaConstructable_;
+  typedef void DestructorSkippable_;
+  ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::raftKVRpcProctoc::LogBrief > tail_;
+  ::PROTOBUF_NAMESPACE_ID::int32 nodeid_;
+  ::PROTOBUF_NAMESPACE_ID::int32 role_;
+  ::PROTOBUF_NAMESPACE_ID::int32 term_;
+  ::PROTOBUF_NAMESPACE_ID::int32 votedfor_;
+  ::PROTOBUF_NAMESPACE_ID::int32 commitindex_;
+  ::PROTOBUF_NAMESPACE_ID::int32 lastapplied_;
+  ::PROTOBUF_NAMESPACE_ID::int32 lastlogindex_;
+  ::PROTOBUF_NAMESPACE_ID::int32 snapshotindex_;
+  ::PROTOBUF_NAMESPACE_ID::int32 kvcount_;
+  ::PROTOBUF_NAMESPACE_ID::int32 raftstatebytes_;
+  mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
+  friend struct ::TableStruct_kvServerRPC_2eproto;
+};
 // ===================================================================
 
 class kvServerRpc_Stub;
@@ -868,6 +1435,10 @@ class kvServerRpc : public ::PROTOBUF_NAMESPACE_ID::Service {
   virtual void Get(::PROTOBUF_NAMESPACE_ID::RpcController* controller,
                        const ::raftKVRpcProctoc::GetArgs* request,
                        ::raftKVRpcProctoc::GetReply* response,
+                       ::google::protobuf::Closure* done);
+  virtual void Status(::PROTOBUF_NAMESPACE_ID::RpcController* controller,
+                       const ::raftKVRpcProctoc::StatusArgs* request,
+                       ::raftKVRpcProctoc::StatusReply* response,
                        ::google::protobuf::Closure* done);
 
   // implements Service ----------------------------------------------
@@ -905,6 +1476,10 @@ class kvServerRpc_Stub : public kvServerRpc {
   void Get(::PROTOBUF_NAMESPACE_ID::RpcController* controller,
                        const ::raftKVRpcProctoc::GetArgs* request,
                        ::raftKVRpcProctoc::GetReply* response,
+                       ::google::protobuf::Closure* done);
+  void Status(::PROTOBUF_NAMESPACE_ID::RpcController* controller,
+                       const ::raftKVRpcProctoc::StatusArgs* request,
+                       ::raftKVRpcProctoc::StatusReply* response,
                        ::google::protobuf::Closure* done);
  private:
   ::PROTOBUF_NAMESPACE_ID::RpcChannel* channel_;
@@ -944,31 +1519,31 @@ inline const std::string& GetArgs::_internal_key() const {
   return key_.Get();
 }
 inline void GetArgs::_internal_set_key(const std::string& value) {
-
+  
   key_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
 }
 inline void GetArgs::set_key(std::string&& value) {
-
+  
   key_.Set(
     &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
   // @@protoc_insertion_point(field_set_rvalue:raftKVRpcProctoc.GetArgs.Key)
 }
 inline void GetArgs::set_key(const char* value) {
   GOOGLE_DCHECK(value != nullptr);
-
+  
   key_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
               GetArena());
   // @@protoc_insertion_point(field_set_char:raftKVRpcProctoc.GetArgs.Key)
 }
 inline void GetArgs::set_key(const void* value,
     size_t size) {
-
+  
   key_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
       reinterpret_cast<const char*>(value), size), GetArena());
   // @@protoc_insertion_point(field_set_pointer:raftKVRpcProctoc.GetArgs.Key)
 }
 inline std::string* GetArgs::_internal_mutable_key() {
-
+  
   return key_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
 inline std::string* GetArgs::release_key() {
@@ -977,9 +1552,9 @@ inline std::string* GetArgs::release_key() {
 }
 inline void GetArgs::set_allocated_key(std::string* key) {
   if (key != nullptr) {
-
+    
   } else {
-
+    
   }
   key_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), key,
       GetArena());
@@ -988,7 +1563,7 @@ inline void GetArgs::set_allocated_key(std::string* key) {
 inline std::string* GetArgs::unsafe_arena_release_key() {
   // @@protoc_insertion_point(field_unsafe_arena_release:raftKVRpcProctoc.GetArgs.Key)
   GOOGLE_DCHECK(GetArena() != nullptr);
-
+  
   return key_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
       GetArena());
 }
@@ -996,9 +1571,9 @@ inline void GetArgs::unsafe_arena_set_allocated_key(
     std::string* key) {
   GOOGLE_DCHECK(GetArena() != nullptr);
   if (key != nullptr) {
-
+    
   } else {
-
+    
   }
   key_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
       key, GetArena());
@@ -1025,31 +1600,31 @@ inline const std::string& GetArgs::_internal_clientid() const {
   return clientid_.Get();
 }
 inline void GetArgs::_internal_set_clientid(const std::string& value) {
-
+  
   clientid_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
 }
 inline void GetArgs::set_clientid(std::string&& value) {
-
+  
   clientid_.Set(
     &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
   // @@protoc_insertion_point(field_set_rvalue:raftKVRpcProctoc.GetArgs.ClientId)
 }
 inline void GetArgs::set_clientid(const char* value) {
   GOOGLE_DCHECK(value != nullptr);
-
+  
   clientid_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
               GetArena());
   // @@protoc_insertion_point(field_set_char:raftKVRpcProctoc.GetArgs.ClientId)
 }
 inline void GetArgs::set_clientid(const void* value,
     size_t size) {
-
+  
   clientid_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
       reinterpret_cast<const char*>(value), size), GetArena());
   // @@protoc_insertion_point(field_set_pointer:raftKVRpcProctoc.GetArgs.ClientId)
 }
 inline std::string* GetArgs::_internal_mutable_clientid() {
-
+  
   return clientid_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
 inline std::string* GetArgs::release_clientid() {
@@ -1058,9 +1633,9 @@ inline std::string* GetArgs::release_clientid() {
 }
 inline void GetArgs::set_allocated_clientid(std::string* clientid) {
   if (clientid != nullptr) {
-
+    
   } else {
-
+    
   }
   clientid_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), clientid,
       GetArena());
@@ -1069,7 +1644,7 @@ inline void GetArgs::set_allocated_clientid(std::string* clientid) {
 inline std::string* GetArgs::unsafe_arena_release_clientid() {
   // @@protoc_insertion_point(field_unsafe_arena_release:raftKVRpcProctoc.GetArgs.ClientId)
   GOOGLE_DCHECK(GetArena() != nullptr);
-
+  
   return clientid_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
       GetArena());
 }
@@ -1077,9 +1652,9 @@ inline void GetArgs::unsafe_arena_set_allocated_clientid(
     std::string* clientid) {
   GOOGLE_DCHECK(GetArena() != nullptr);
   if (clientid != nullptr) {
-
+    
   } else {
-
+    
   }
   clientid_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
       clientid, GetArena());
@@ -1098,7 +1673,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int32 GetArgs::requestid() const {
   return _internal_requestid();
 }
 inline void GetArgs::_internal_set_requestid(::PROTOBUF_NAMESPACE_ID::int32 value) {
-
+  
   requestid_ = value;
 }
 inline void GetArgs::set_requestid(::PROTOBUF_NAMESPACE_ID::int32 value) {
@@ -1130,31 +1705,31 @@ inline const std::string& GetReply::_internal_err() const {
   return err_.Get();
 }
 inline void GetReply::_internal_set_err(const std::string& value) {
-
+  
   err_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
 }
 inline void GetReply::set_err(std::string&& value) {
-
+  
   err_.Set(
     &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
   // @@protoc_insertion_point(field_set_rvalue:raftKVRpcProctoc.GetReply.Err)
 }
 inline void GetReply::set_err(const char* value) {
   GOOGLE_DCHECK(value != nullptr);
-
+  
   err_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
               GetArena());
   // @@protoc_insertion_point(field_set_char:raftKVRpcProctoc.GetReply.Err)
 }
 inline void GetReply::set_err(const void* value,
     size_t size) {
-
+  
   err_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
       reinterpret_cast<const char*>(value), size), GetArena());
   // @@protoc_insertion_point(field_set_pointer:raftKVRpcProctoc.GetReply.Err)
 }
 inline std::string* GetReply::_internal_mutable_err() {
-
+  
   return err_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
 inline std::string* GetReply::release_err() {
@@ -1163,9 +1738,9 @@ inline std::string* GetReply::release_err() {
 }
 inline void GetReply::set_allocated_err(std::string* err) {
   if (err != nullptr) {
-
+    
   } else {
-
+    
   }
   err_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), err,
       GetArena());
@@ -1174,7 +1749,7 @@ inline void GetReply::set_allocated_err(std::string* err) {
 inline std::string* GetReply::unsafe_arena_release_err() {
   // @@protoc_insertion_point(field_unsafe_arena_release:raftKVRpcProctoc.GetReply.Err)
   GOOGLE_DCHECK(GetArena() != nullptr);
-
+  
   return err_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
       GetArena());
 }
@@ -1182,9 +1757,9 @@ inline void GetReply::unsafe_arena_set_allocated_err(
     std::string* err) {
   GOOGLE_DCHECK(GetArena() != nullptr);
   if (err != nullptr) {
-
+    
   } else {
-
+    
   }
   err_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
       err, GetArena());
@@ -1211,31 +1786,31 @@ inline const std::string& GetReply::_internal_value() const {
   return value_.Get();
 }
 inline void GetReply::_internal_set_value(const std::string& value) {
-
+  
   value_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
 }
 inline void GetReply::set_value(std::string&& value) {
-
+  
   value_.Set(
     &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
   // @@protoc_insertion_point(field_set_rvalue:raftKVRpcProctoc.GetReply.Value)
 }
 inline void GetReply::set_value(const char* value) {
   GOOGLE_DCHECK(value != nullptr);
-
+  
   value_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
               GetArena());
   // @@protoc_insertion_point(field_set_char:raftKVRpcProctoc.GetReply.Value)
 }
 inline void GetReply::set_value(const void* value,
     size_t size) {
-
+  
   value_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
       reinterpret_cast<const char*>(value), size), GetArena());
   // @@protoc_insertion_point(field_set_pointer:raftKVRpcProctoc.GetReply.Value)
 }
 inline std::string* GetReply::_internal_mutable_value() {
-
+  
   return value_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
 inline std::string* GetReply::release_value() {
@@ -1244,9 +1819,9 @@ inline std::string* GetReply::release_value() {
 }
 inline void GetReply::set_allocated_value(std::string* value) {
   if (value != nullptr) {
-
+    
   } else {
-
+    
   }
   value_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value,
       GetArena());
@@ -1255,7 +1830,7 @@ inline void GetReply::set_allocated_value(std::string* value) {
 inline std::string* GetReply::unsafe_arena_release_value() {
   // @@protoc_insertion_point(field_unsafe_arena_release:raftKVRpcProctoc.GetReply.Value)
   GOOGLE_DCHECK(GetArena() != nullptr);
-
+  
   return value_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
       GetArena());
 }
@@ -1263,9 +1838,9 @@ inline void GetReply::unsafe_arena_set_allocated_value(
     std::string* value) {
   GOOGLE_DCHECK(GetArena() != nullptr);
   if (value != nullptr) {
-
+    
   } else {
-
+    
   }
   value_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
       value, GetArena());
@@ -1296,31 +1871,31 @@ inline const std::string& PutAppendArgs::_internal_key() const {
   return key_.Get();
 }
 inline void PutAppendArgs::_internal_set_key(const std::string& value) {
-
+  
   key_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
 }
 inline void PutAppendArgs::set_key(std::string&& value) {
-
+  
   key_.Set(
     &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
   // @@protoc_insertion_point(field_set_rvalue:raftKVRpcProctoc.PutAppendArgs.Key)
 }
 inline void PutAppendArgs::set_key(const char* value) {
   GOOGLE_DCHECK(value != nullptr);
-
+  
   key_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
               GetArena());
   // @@protoc_insertion_point(field_set_char:raftKVRpcProctoc.PutAppendArgs.Key)
 }
 inline void PutAppendArgs::set_key(const void* value,
     size_t size) {
-
+  
   key_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
       reinterpret_cast<const char*>(value), size), GetArena());
   // @@protoc_insertion_point(field_set_pointer:raftKVRpcProctoc.PutAppendArgs.Key)
 }
 inline std::string* PutAppendArgs::_internal_mutable_key() {
-
+  
   return key_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
 inline std::string* PutAppendArgs::release_key() {
@@ -1329,9 +1904,9 @@ inline std::string* PutAppendArgs::release_key() {
 }
 inline void PutAppendArgs::set_allocated_key(std::string* key) {
   if (key != nullptr) {
-
+    
   } else {
-
+    
   }
   key_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), key,
       GetArena());
@@ -1340,7 +1915,7 @@ inline void PutAppendArgs::set_allocated_key(std::string* key) {
 inline std::string* PutAppendArgs::unsafe_arena_release_key() {
   // @@protoc_insertion_point(field_unsafe_arena_release:raftKVRpcProctoc.PutAppendArgs.Key)
   GOOGLE_DCHECK(GetArena() != nullptr);
-
+  
   return key_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
       GetArena());
 }
@@ -1348,9 +1923,9 @@ inline void PutAppendArgs::unsafe_arena_set_allocated_key(
     std::string* key) {
   GOOGLE_DCHECK(GetArena() != nullptr);
   if (key != nullptr) {
-
+    
   } else {
-
+    
   }
   key_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
       key, GetArena());
@@ -1377,31 +1952,31 @@ inline const std::string& PutAppendArgs::_internal_value() const {
   return value_.Get();
 }
 inline void PutAppendArgs::_internal_set_value(const std::string& value) {
-
+  
   value_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
 }
 inline void PutAppendArgs::set_value(std::string&& value) {
-
+  
   value_.Set(
     &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
   // @@protoc_insertion_point(field_set_rvalue:raftKVRpcProctoc.PutAppendArgs.Value)
 }
 inline void PutAppendArgs::set_value(const char* value) {
   GOOGLE_DCHECK(value != nullptr);
-
+  
   value_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
               GetArena());
   // @@protoc_insertion_point(field_set_char:raftKVRpcProctoc.PutAppendArgs.Value)
 }
 inline void PutAppendArgs::set_value(const void* value,
     size_t size) {
-
+  
   value_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
       reinterpret_cast<const char*>(value), size), GetArena());
   // @@protoc_insertion_point(field_set_pointer:raftKVRpcProctoc.PutAppendArgs.Value)
 }
 inline std::string* PutAppendArgs::_internal_mutable_value() {
-
+  
   return value_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
 inline std::string* PutAppendArgs::release_value() {
@@ -1410,9 +1985,9 @@ inline std::string* PutAppendArgs::release_value() {
 }
 inline void PutAppendArgs::set_allocated_value(std::string* value) {
   if (value != nullptr) {
-
+    
   } else {
-
+    
   }
   value_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value,
       GetArena());
@@ -1421,7 +1996,7 @@ inline void PutAppendArgs::set_allocated_value(std::string* value) {
 inline std::string* PutAppendArgs::unsafe_arena_release_value() {
   // @@protoc_insertion_point(field_unsafe_arena_release:raftKVRpcProctoc.PutAppendArgs.Value)
   GOOGLE_DCHECK(GetArena() != nullptr);
-
+  
   return value_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
       GetArena());
 }
@@ -1429,9 +2004,9 @@ inline void PutAppendArgs::unsafe_arena_set_allocated_value(
     std::string* value) {
   GOOGLE_DCHECK(GetArena() != nullptr);
   if (value != nullptr) {
-
+    
   } else {
-
+    
   }
   value_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
       value, GetArena());
@@ -1458,31 +2033,31 @@ inline const std::string& PutAppendArgs::_internal_op() const {
   return op_.Get();
 }
 inline void PutAppendArgs::_internal_set_op(const std::string& value) {
-
+  
   op_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
 }
 inline void PutAppendArgs::set_op(std::string&& value) {
-
+  
   op_.Set(
     &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
   // @@protoc_insertion_point(field_set_rvalue:raftKVRpcProctoc.PutAppendArgs.Op)
 }
 inline void PutAppendArgs::set_op(const char* value) {
   GOOGLE_DCHECK(value != nullptr);
-
+  
   op_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
               GetArena());
   // @@protoc_insertion_point(field_set_char:raftKVRpcProctoc.PutAppendArgs.Op)
 }
 inline void PutAppendArgs::set_op(const void* value,
     size_t size) {
-
+  
   op_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
       reinterpret_cast<const char*>(value), size), GetArena());
   // @@protoc_insertion_point(field_set_pointer:raftKVRpcProctoc.PutAppendArgs.Op)
 }
 inline std::string* PutAppendArgs::_internal_mutable_op() {
-
+  
   return op_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
 inline std::string* PutAppendArgs::release_op() {
@@ -1491,9 +2066,9 @@ inline std::string* PutAppendArgs::release_op() {
 }
 inline void PutAppendArgs::set_allocated_op(std::string* op) {
   if (op != nullptr) {
-
+    
   } else {
-
+    
   }
   op_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), op,
       GetArena());
@@ -1502,7 +2077,7 @@ inline void PutAppendArgs::set_allocated_op(std::string* op) {
 inline std::string* PutAppendArgs::unsafe_arena_release_op() {
   // @@protoc_insertion_point(field_unsafe_arena_release:raftKVRpcProctoc.PutAppendArgs.Op)
   GOOGLE_DCHECK(GetArena() != nullptr);
-
+  
   return op_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
       GetArena());
 }
@@ -1510,9 +2085,9 @@ inline void PutAppendArgs::unsafe_arena_set_allocated_op(
     std::string* op) {
   GOOGLE_DCHECK(GetArena() != nullptr);
   if (op != nullptr) {
-
+    
   } else {
-
+    
   }
   op_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
       op, GetArena());
@@ -1539,31 +2114,31 @@ inline const std::string& PutAppendArgs::_internal_clientid() const {
   return clientid_.Get();
 }
 inline void PutAppendArgs::_internal_set_clientid(const std::string& value) {
-
+  
   clientid_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
 }
 inline void PutAppendArgs::set_clientid(std::string&& value) {
-
+  
   clientid_.Set(
     &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
   // @@protoc_insertion_point(field_set_rvalue:raftKVRpcProctoc.PutAppendArgs.ClientId)
 }
 inline void PutAppendArgs::set_clientid(const char* value) {
   GOOGLE_DCHECK(value != nullptr);
-
+  
   clientid_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
               GetArena());
   // @@protoc_insertion_point(field_set_char:raftKVRpcProctoc.PutAppendArgs.ClientId)
 }
 inline void PutAppendArgs::set_clientid(const void* value,
     size_t size) {
-
+  
   clientid_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
       reinterpret_cast<const char*>(value), size), GetArena());
   // @@protoc_insertion_point(field_set_pointer:raftKVRpcProctoc.PutAppendArgs.ClientId)
 }
 inline std::string* PutAppendArgs::_internal_mutable_clientid() {
-
+  
   return clientid_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
 inline std::string* PutAppendArgs::release_clientid() {
@@ -1572,9 +2147,9 @@ inline std::string* PutAppendArgs::release_clientid() {
 }
 inline void PutAppendArgs::set_allocated_clientid(std::string* clientid) {
   if (clientid != nullptr) {
-
+    
   } else {
-
+    
   }
   clientid_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), clientid,
       GetArena());
@@ -1583,7 +2158,7 @@ inline void PutAppendArgs::set_allocated_clientid(std::string* clientid) {
 inline std::string* PutAppendArgs::unsafe_arena_release_clientid() {
   // @@protoc_insertion_point(field_unsafe_arena_release:raftKVRpcProctoc.PutAppendArgs.ClientId)
   GOOGLE_DCHECK(GetArena() != nullptr);
-
+  
   return clientid_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
       GetArena());
 }
@@ -1591,9 +2166,9 @@ inline void PutAppendArgs::unsafe_arena_set_allocated_clientid(
     std::string* clientid) {
   GOOGLE_DCHECK(GetArena() != nullptr);
   if (clientid != nullptr) {
-
+    
   } else {
-
+    
   }
   clientid_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
       clientid, GetArena());
@@ -1612,7 +2187,7 @@ inline ::PROTOBUF_NAMESPACE_ID::int32 PutAppendArgs::requestid() const {
   return _internal_requestid();
 }
 inline void PutAppendArgs::_internal_set_requestid(::PROTOBUF_NAMESPACE_ID::int32 value) {
-
+  
   requestid_ = value;
 }
 inline void PutAppendArgs::set_requestid(::PROTOBUF_NAMESPACE_ID::int32 value) {
@@ -1644,31 +2219,31 @@ inline const std::string& PutAppendReply::_internal_err() const {
   return err_.Get();
 }
 inline void PutAppendReply::_internal_set_err(const std::string& value) {
-
+  
   err_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
 }
 inline void PutAppendReply::set_err(std::string&& value) {
-
+  
   err_.Set(
     &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
   // @@protoc_insertion_point(field_set_rvalue:raftKVRpcProctoc.PutAppendReply.Err)
 }
 inline void PutAppendReply::set_err(const char* value) {
   GOOGLE_DCHECK(value != nullptr);
-
+  
   err_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
               GetArena());
   // @@protoc_insertion_point(field_set_char:raftKVRpcProctoc.PutAppendReply.Err)
 }
 inline void PutAppendReply::set_err(const void* value,
     size_t size) {
-
+  
   err_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
       reinterpret_cast<const char*>(value), size), GetArena());
   // @@protoc_insertion_point(field_set_pointer:raftKVRpcProctoc.PutAppendReply.Err)
 }
 inline std::string* PutAppendReply::_internal_mutable_err() {
-
+  
   return err_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
 inline std::string* PutAppendReply::release_err() {
@@ -1677,9 +2252,9 @@ inline std::string* PutAppendReply::release_err() {
 }
 inline void PutAppendReply::set_allocated_err(std::string* err) {
   if (err != nullptr) {
-
+    
   } else {
-
+    
   }
   err_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), err,
       GetArena());
@@ -1688,7 +2263,7 @@ inline void PutAppendReply::set_allocated_err(std::string* err) {
 inline std::string* PutAppendReply::unsafe_arena_release_err() {
   // @@protoc_insertion_point(field_unsafe_arena_release:raftKVRpcProctoc.PutAppendReply.Err)
   GOOGLE_DCHECK(GetArena() != nullptr);
-
+  
   return err_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
       GetArena());
 }
@@ -1696,18 +2271,396 @@ inline void PutAppendReply::unsafe_arena_set_allocated_err(
     std::string* err) {
   GOOGLE_DCHECK(GetArena() != nullptr);
   if (err != nullptr) {
-
+    
   } else {
-
+    
   }
   err_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
       err, GetArena());
   // @@protoc_insertion_point(field_unsafe_arena_set_allocated:raftKVRpcProctoc.PutAppendReply.Err)
 }
 
+// -------------------------------------------------------------------
+
+// StatusArgs
+
+// -------------------------------------------------------------------
+
+// LogBrief
+
+// int32 Index = 1;
+inline void LogBrief::clear_index() {
+  index_ = 0;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 LogBrief::_internal_index() const {
+  return index_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 LogBrief::index() const {
+  // @@protoc_insertion_point(field_get:raftKVRpcProctoc.LogBrief.Index)
+  return _internal_index();
+}
+inline void LogBrief::_internal_set_index(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  
+  index_ = value;
+}
+inline void LogBrief::set_index(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_index(value);
+  // @@protoc_insertion_point(field_set:raftKVRpcProctoc.LogBrief.Index)
+}
+
+// int32 Term = 2;
+inline void LogBrief::clear_term() {
+  term_ = 0;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 LogBrief::_internal_term() const {
+  return term_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 LogBrief::term() const {
+  // @@protoc_insertion_point(field_get:raftKVRpcProctoc.LogBrief.Term)
+  return _internal_term();
+}
+inline void LogBrief::_internal_set_term(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  
+  term_ = value;
+}
+inline void LogBrief::set_term(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_term(value);
+  // @@protoc_insertion_point(field_set:raftKVRpcProctoc.LogBrief.Term)
+}
+
+// bytes Summary = 3;
+inline void LogBrief::clear_summary() {
+  summary_.ClearToEmpty(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline const std::string& LogBrief::summary() const {
+  // @@protoc_insertion_point(field_get:raftKVRpcProctoc.LogBrief.Summary)
+  return _internal_summary();
+}
+inline void LogBrief::set_summary(const std::string& value) {
+  _internal_set_summary(value);
+  // @@protoc_insertion_point(field_set:raftKVRpcProctoc.LogBrief.Summary)
+}
+inline std::string* LogBrief::mutable_summary() {
+  // @@protoc_insertion_point(field_mutable:raftKVRpcProctoc.LogBrief.Summary)
+  return _internal_mutable_summary();
+}
+inline const std::string& LogBrief::_internal_summary() const {
+  return summary_.Get();
+}
+inline void LogBrief::_internal_set_summary(const std::string& value) {
+  
+  summary_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), value, GetArena());
+}
+inline void LogBrief::set_summary(std::string&& value) {
+  
+  summary_.Set(
+    &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:raftKVRpcProctoc.LogBrief.Summary)
+}
+inline void LogBrief::set_summary(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  
+  summary_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(value),
+              GetArena());
+  // @@protoc_insertion_point(field_set_char:raftKVRpcProctoc.LogBrief.Summary)
+}
+inline void LogBrief::set_summary(const void* value,
+    size_t size) {
+  
+  summary_.Set(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:raftKVRpcProctoc.LogBrief.Summary)
+}
+inline std::string* LogBrief::_internal_mutable_summary() {
+  
+  return summary_.Mutable(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline std::string* LogBrief::release_summary() {
+  // @@protoc_insertion_point(field_release:raftKVRpcProctoc.LogBrief.Summary)
+  return summary_.Release(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void LogBrief::set_allocated_summary(std::string* summary) {
+  if (summary != nullptr) {
+    
+  } else {
+    
+  }
+  summary_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), summary,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:raftKVRpcProctoc.LogBrief.Summary)
+}
+inline std::string* LogBrief::unsafe_arena_release_summary() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:raftKVRpcProctoc.LogBrief.Summary)
+  GOOGLE_DCHECK(GetArena() != nullptr);
+  
+  return summary_.UnsafeArenaRelease(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      GetArena());
+}
+inline void LogBrief::unsafe_arena_set_allocated_summary(
+    std::string* summary) {
+  GOOGLE_DCHECK(GetArena() != nullptr);
+  if (summary != nullptr) {
+    
+  } else {
+    
+  }
+  summary_.UnsafeArenaSetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(),
+      summary, GetArena());
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:raftKVRpcProctoc.LogBrief.Summary)
+}
+
+// -------------------------------------------------------------------
+
+// StatusReply
+
+// int32 NodeId = 1;
+inline void StatusReply::clear_nodeid() {
+  nodeid_ = 0;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 StatusReply::_internal_nodeid() const {
+  return nodeid_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 StatusReply::nodeid() const {
+  // @@protoc_insertion_point(field_get:raftKVRpcProctoc.StatusReply.NodeId)
+  return _internal_nodeid();
+}
+inline void StatusReply::_internal_set_nodeid(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  
+  nodeid_ = value;
+}
+inline void StatusReply::set_nodeid(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_nodeid(value);
+  // @@protoc_insertion_point(field_set:raftKVRpcProctoc.StatusReply.NodeId)
+}
+
+// int32 Role = 2;
+inline void StatusReply::clear_role() {
+  role_ = 0;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 StatusReply::_internal_role() const {
+  return role_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 StatusReply::role() const {
+  // @@protoc_insertion_point(field_get:raftKVRpcProctoc.StatusReply.Role)
+  return _internal_role();
+}
+inline void StatusReply::_internal_set_role(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  
+  role_ = value;
+}
+inline void StatusReply::set_role(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_role(value);
+  // @@protoc_insertion_point(field_set:raftKVRpcProctoc.StatusReply.Role)
+}
+
+// int32 Term = 3;
+inline void StatusReply::clear_term() {
+  term_ = 0;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 StatusReply::_internal_term() const {
+  return term_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 StatusReply::term() const {
+  // @@protoc_insertion_point(field_get:raftKVRpcProctoc.StatusReply.Term)
+  return _internal_term();
+}
+inline void StatusReply::_internal_set_term(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  
+  term_ = value;
+}
+inline void StatusReply::set_term(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_term(value);
+  // @@protoc_insertion_point(field_set:raftKVRpcProctoc.StatusReply.Term)
+}
+
+// int32 VotedFor = 4;
+inline void StatusReply::clear_votedfor() {
+  votedfor_ = 0;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 StatusReply::_internal_votedfor() const {
+  return votedfor_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 StatusReply::votedfor() const {
+  // @@protoc_insertion_point(field_get:raftKVRpcProctoc.StatusReply.VotedFor)
+  return _internal_votedfor();
+}
+inline void StatusReply::_internal_set_votedfor(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  
+  votedfor_ = value;
+}
+inline void StatusReply::set_votedfor(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_votedfor(value);
+  // @@protoc_insertion_point(field_set:raftKVRpcProctoc.StatusReply.VotedFor)
+}
+
+// int32 CommitIndex = 5;
+inline void StatusReply::clear_commitindex() {
+  commitindex_ = 0;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 StatusReply::_internal_commitindex() const {
+  return commitindex_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 StatusReply::commitindex() const {
+  // @@protoc_insertion_point(field_get:raftKVRpcProctoc.StatusReply.CommitIndex)
+  return _internal_commitindex();
+}
+inline void StatusReply::_internal_set_commitindex(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  
+  commitindex_ = value;
+}
+inline void StatusReply::set_commitindex(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_commitindex(value);
+  // @@protoc_insertion_point(field_set:raftKVRpcProctoc.StatusReply.CommitIndex)
+}
+
+// int32 LastApplied = 6;
+inline void StatusReply::clear_lastapplied() {
+  lastapplied_ = 0;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 StatusReply::_internal_lastapplied() const {
+  return lastapplied_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 StatusReply::lastapplied() const {
+  // @@protoc_insertion_point(field_get:raftKVRpcProctoc.StatusReply.LastApplied)
+  return _internal_lastapplied();
+}
+inline void StatusReply::_internal_set_lastapplied(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  
+  lastapplied_ = value;
+}
+inline void StatusReply::set_lastapplied(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_lastapplied(value);
+  // @@protoc_insertion_point(field_set:raftKVRpcProctoc.StatusReply.LastApplied)
+}
+
+// int32 LastLogIndex = 7;
+inline void StatusReply::clear_lastlogindex() {
+  lastlogindex_ = 0;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 StatusReply::_internal_lastlogindex() const {
+  return lastlogindex_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 StatusReply::lastlogindex() const {
+  // @@protoc_insertion_point(field_get:raftKVRpcProctoc.StatusReply.LastLogIndex)
+  return _internal_lastlogindex();
+}
+inline void StatusReply::_internal_set_lastlogindex(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  
+  lastlogindex_ = value;
+}
+inline void StatusReply::set_lastlogindex(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_lastlogindex(value);
+  // @@protoc_insertion_point(field_set:raftKVRpcProctoc.StatusReply.LastLogIndex)
+}
+
+// int32 SnapshotIndex = 8;
+inline void StatusReply::clear_snapshotindex() {
+  snapshotindex_ = 0;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 StatusReply::_internal_snapshotindex() const {
+  return snapshotindex_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 StatusReply::snapshotindex() const {
+  // @@protoc_insertion_point(field_get:raftKVRpcProctoc.StatusReply.SnapshotIndex)
+  return _internal_snapshotindex();
+}
+inline void StatusReply::_internal_set_snapshotindex(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  
+  snapshotindex_ = value;
+}
+inline void StatusReply::set_snapshotindex(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_snapshotindex(value);
+  // @@protoc_insertion_point(field_set:raftKVRpcProctoc.StatusReply.SnapshotIndex)
+}
+
+// int32 KvCount = 9;
+inline void StatusReply::clear_kvcount() {
+  kvcount_ = 0;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 StatusReply::_internal_kvcount() const {
+  return kvcount_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 StatusReply::kvcount() const {
+  // @@protoc_insertion_point(field_get:raftKVRpcProctoc.StatusReply.KvCount)
+  return _internal_kvcount();
+}
+inline void StatusReply::_internal_set_kvcount(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  
+  kvcount_ = value;
+}
+inline void StatusReply::set_kvcount(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_kvcount(value);
+  // @@protoc_insertion_point(field_set:raftKVRpcProctoc.StatusReply.KvCount)
+}
+
+// int32 RaftStateBytes = 10;
+inline void StatusReply::clear_raftstatebytes() {
+  raftstatebytes_ = 0;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 StatusReply::_internal_raftstatebytes() const {
+  return raftstatebytes_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 StatusReply::raftstatebytes() const {
+  // @@protoc_insertion_point(field_get:raftKVRpcProctoc.StatusReply.RaftStateBytes)
+  return _internal_raftstatebytes();
+}
+inline void StatusReply::_internal_set_raftstatebytes(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  
+  raftstatebytes_ = value;
+}
+inline void StatusReply::set_raftstatebytes(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_raftstatebytes(value);
+  // @@protoc_insertion_point(field_set:raftKVRpcProctoc.StatusReply.RaftStateBytes)
+}
+
+// repeated .raftKVRpcProctoc.LogBrief Tail = 11;
+inline int StatusReply::_internal_tail_size() const {
+  return tail_.size();
+}
+inline int StatusReply::tail_size() const {
+  return _internal_tail_size();
+}
+inline void StatusReply::clear_tail() {
+  tail_.Clear();
+}
+inline ::raftKVRpcProctoc::LogBrief* StatusReply::mutable_tail(int index) {
+  // @@protoc_insertion_point(field_mutable:raftKVRpcProctoc.StatusReply.Tail)
+  return tail_.Mutable(index);
+}
+inline ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::raftKVRpcProctoc::LogBrief >*
+StatusReply::mutable_tail() {
+  // @@protoc_insertion_point(field_mutable_list:raftKVRpcProctoc.StatusReply.Tail)
+  return &tail_;
+}
+inline const ::raftKVRpcProctoc::LogBrief& StatusReply::_internal_tail(int index) const {
+  return tail_.Get(index);
+}
+inline const ::raftKVRpcProctoc::LogBrief& StatusReply::tail(int index) const {
+  // @@protoc_insertion_point(field_get:raftKVRpcProctoc.StatusReply.Tail)
+  return _internal_tail(index);
+}
+inline ::raftKVRpcProctoc::LogBrief* StatusReply::_internal_add_tail() {
+  return tail_.Add();
+}
+inline ::raftKVRpcProctoc::LogBrief* StatusReply::add_tail() {
+  // @@protoc_insertion_point(field_add:raftKVRpcProctoc.StatusReply.Tail)
+  return _internal_add_tail();
+}
+inline const ::PROTOBUF_NAMESPACE_ID::RepeatedPtrField< ::raftKVRpcProctoc::LogBrief >&
+StatusReply::tail() const {
+  // @@protoc_insertion_point(field_list:raftKVRpcProctoc.StatusReply.Tail)
+  return tail_;
+}
+
 #ifdef __GNUC__
   #pragma GCC diagnostic pop
 #endif  // __GNUC__
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
+// -------------------------------------------------------------------
+
 // -------------------------------------------------------------------
 
 // -------------------------------------------------------------------

@@ -320,8 +320,8 @@ void Raft::electionTimeOutTicker() {
      * 如果不睡眠，那么对于leader，这个函数会一直空转，浪费cpu。且加入协程之后，空转会导致其他协程无法运行，对于时间敏感的AE，会导致心跳无法正常发送导致异常
      */
     while (m_status == Leader) {
-      usleep(
-          HeartBeatTimeout);  //定时时间没有严谨设置，因为HeartBeatTimeout比选举超时一般小一个数量级，因此就设置为HeartBeatTimeout了
+      // usleep 的单位是微秒，HeartBeatTimeout 是毫秒；之前漏乘 1000，leader 在这里每 25 微秒醒一次，空转占满一个核
+      usleep(1000 * HeartBeatTimeout);  //定时时间没有严谨设置，因为HeartBeatTimeout比选举超时一般小一个数量级，因此就设置为HeartBeatTimeout了
     }
     std::chrono::duration<signed long int, std::ratio<1, 1000000000>> suitableSleepTime{};
     std::chrono::system_clock::time_point wakeTime{};
@@ -346,10 +346,10 @@ void Raft::electionTimeOutTicker() {
       std::chrono::duration<double, std::milli> duration = end - start;
 
       // 使用ANSI控制序列将输出颜色修改为紫色
-      std::cout << "\033[1;35m electionTimeOutTicker();函数设置睡眠时间为: "
+      if (Debug) std::cout << "\033[1;35m electionTimeOutTicker();函数设置睡眠时间为: "
                 << std::chrono::duration_cast<std::chrono::milliseconds>(suitableSleepTime).count() << " 毫秒\033[0m"
                 << std::endl;
-      std::cout << "\033[1;35m electionTimeOutTicker();函数实际睡眠时间为: " << duration.count() << " 毫秒\033[0m"
+      if (Debug) std::cout << "\033[1;35m electionTimeOutTicker();函数实际睡眠时间为: " << duration.count() << " 毫秒\033[0m"
                 << std::endl;
     }
 
@@ -527,7 +527,7 @@ void Raft::leaderHearBeatTicker() {
     }
 
     if (std::chrono::duration<double, std::milli>(suitableSleepTime).count() > 1) {
-      std::cout << atomicCount << "\033[1;35m leaderHearBeatTicker();函数设置睡眠时间为: "
+      if (Debug) std::cout << atomicCount << "\033[1;35m leaderHearBeatTicker();函数设置睡眠时间为: "
                 << std::chrono::duration_cast<std::chrono::milliseconds>(suitableSleepTime).count() << " 毫秒\033[0m"
                 << std::endl;
       // 获取当前时间点
@@ -543,7 +543,7 @@ void Raft::leaderHearBeatTicker() {
       std::chrono::duration<double, std::milli> duration = end - start;
 
       // 使用ANSI控制序列将输出颜色修改为紫色
-      std::cout << atomicCount << "\033[1;35m leaderHearBeatTicker();函数实际睡眠时间为: " << duration.count()
+      if (Debug) std::cout << atomicCount << "\033[1;35m leaderHearBeatTicker();函数实际睡眠时间为: " << duration.count()
                 << " 毫秒\033[0m" << std::endl;
       ++atomicCount;
     }
@@ -777,6 +777,23 @@ int Raft::getLogTermFromLogIndex(int logIndex) {
 }
 
 int Raft::GetRaftStateSize() { return m_persister->RaftStateSize(); }
+
+void Raft::GetStatus(RaftStatus *out, int tailLen) {
+  std::lock_guard<std::mutex> lg(m_mtx);
+  out->role = static_cast<int>(m_status);
+  out->term = m_currentTerm;
+  out->votedFor = m_votedFor;
+  out->commitIndex = m_commitIndex;
+  out->lastApplied = m_lastApplied;
+  out->lastLogIndex = getLastLogIndex();
+  out->snapshotIndex = m_lastSnapshotIncludeIndex;
+  out->raftStateBytes = static_cast<int>(m_persister->RaftStateSize());
+  out->tail.clear();
+  size_t begin = m_logs.size() > static_cast<size_t>(tailLen) ? m_logs.size() - tailLen : 0;
+  for (size_t i = begin; i < m_logs.size(); ++i) {
+    out->tail.push_back({m_logs[i].logindex(), m_logs[i].logterm(), m_logs[i].command()});
+  }
+}
 
 // 找到index对应的真实下标位置！！！
 // 限制，输入的logIndex必须保存在当前的logs里面（不包含snapshot）

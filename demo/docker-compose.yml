@@ -1,0 +1,15 @@
+# 本地运行：docker compose -f demo/docker-compose.yml up --build，然后打开 http://localhost:8000
+services:
+  raft-demo:
+    build:
+      context: ..
+      dockerfile: demo/Dockerfile
+    image: raft-playground:latest
+    ports:
+      - "8000:8000"
+    volumes:
+      - raft-data:/data
+    restart: unless-stopped
+
+volumes:
+  raft-data:

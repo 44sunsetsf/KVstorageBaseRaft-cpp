@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Raft playground</title>
+<meta name="description" content="A key-value store on five Raft nodes written in C++. Kill the leader, kill every node, and watch the data survive.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='13' fill='%23141B24'/%3E%3Ccircle cx='16' cy='16' r='5' fill='%23F2F4F6'/%3E%3C/svg%3E">
+<link rel="preload" href="fonts/bricolage-grotesque.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="top">
+  <div class="wrap top-row">
+    <a class="brand" href="#top"><span class="brand-dot" aria-hidden="true"></span><span data-i18n="brand">Raft playground</span></a>
+    <nav class="top-nav">
+      <a href="https://github.com/44sunsetsf/KVstorageBaseRaft-cpp" target="_blank" rel="noopener">GitHub</a>
+      <button class="lang" id="lang" type="button" aria-label="Switch language">中文</button>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+  <section class="wrap intro">
+    <h1 data-i18n="h1">Five Raft nodes. Break them any way you like.</h1>
+    <div class="intro-side">
+      <p data-i18n="lead">A key-value store written in C++ from the consensus layer up. Kill the leader, kill every node, then check whether any data went missing.</p>
+      <div class="intro-actions">
+        <button class="btn primary" id="run-test" type="button" data-i18n="runTest">Run failover test</button>
+        <a class="btn ghost" href="#perf" data-i18n="seePerf">See the numbers</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="wrap board-grid">
+    <div class="board" aria-labelledby="h-cluster">
+      <div class="panel-head">
+        <h2 id="h-cluster" data-i18n="cluster">Cluster</h2>
+        <p class="status-line" id="status-line" aria-live="polite"></p>
+      </div>
+      <svg id="ring" viewBox="0 0 520 430" role="img" aria-label="Cluster of five nodes">
+        <defs>
+          <pattern id="hatch" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+            <rect width="7" height="7" fill="#fff"/><line x1="0" y1="0" x2="0" y2="7" stroke="#9AA4AF" stroke-width="2.4"/>
+          </pattern>
+          <pattern id="hatch-ice" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+            <rect width="7" height="7" fill="#fff"/><line x1="0" y1="0" x2="0" y2="7" stroke="#7FA2FF" stroke-width="2.4"/>
+          </pattern>
+        </defs>
+        <g id="spokes"></g>
+        <g id="nodes"></g>
+        <g id="center" class="center">
+          <text class="center-label" x="260" y="198" text-anchor="middle" data-i18n="term">term</text>
+          <text class="center-term" id="center-term" x="260" y="244" text-anchor="middle">–</text>
+          <text class="center-sub" id="center-sub" x="260" y="266" text-anchor="middle"></text>
+        </g>
+      </svg>
+      <div class="legend" aria-hidden="true">
+        <span><i class="lg leader"></i><b data-i18n="leader">leader</b></span>
+        <span><i class="lg follower"></i><b data-i18n="follower">follower</b></span>
+        <span><i class="lg candidate"></i><b data-i18n="candidate">candidate</b></span>
+        <span><i class="lg paused"></i><b data-i18n="paused">paused</b></span>
+        <span><i class="lg down"></i><b data-i18n="down">down</b></span>
+      </div>
+      <div class="actions" role="group" aria-label="Failure injection">
+        <div class="act-group">
+          <span class="act-title" id="sel-title" data-i18n="selectNode">Click a node to select it</span>
+          <div class="act-buttons">
+            <button class="btn danger" data-act="kill" data-needs-node type="button" data-i18n="kill">Kill</button>
+            <button class="btn" data-act="start" data-needs-node type="button" data-i18n="start">Start</button>
+            <button class="btn" data-act="pause" data-needs-node type="button" data-i18n="pause">Pause</button>
+            <button class="btn" data-act="resume" data-needs-node type="button" data-i18n="resume">Resume</button>
+          </div>
+        </div>
+        <div class="act-group">
+          <span class="act-title" data-i18n="wholeCluster">Whole cluster</span>
+          <div class="act-buttons">
+            <button class="btn danger" data-act="kill_leader" type="button" data-i18n="killLeader">Kill the leader</button>
+            <button class="btn danger" data-act="kill_all" type="button" data-i18n="killAll">Kill all</button>
+            <button class="btn" data-act="restart_all" type="button" data-i18n="restartAll">Restart all</button>
+            <button class="btn" data-act="reset" type="button" data-i18n="reset">Wipe data</button>
+          </div>
+        </div>
+        <p class="hint" data-i18n="pauseHint">Pause freezes the process (SIGSTOP), like a network partition or a long GC pause. When it resumes, the old leader learns it has been replaced.</p>
+      </div>
+    </div>
+
+    <div class="logs" aria-labelledby="h-logs">
+      <div class="panel-head">
+        <h2 id="h-logs" data-i18n="logs">Replicated logs</h2>
+        <p class="status-line" data-i18n="logsHint">Each cell is one log entry. Filled means committed. Colour is the term it was written in.</p>
+      </div>
+      <div id="tapes" class="tapes"></div>
+    </div>
+  </section>
+
+  <section class="wrap console-grid">
+    <div class="kv" aria-labelledby="h-kv">
+      <div class="panel-head"><h2 id="h-kv" data-i18n="kvTitle">Key-value store</h2></div>
+      <form id="kv-form" class="kv-form" autocomplete="off">
+        <label><span data-i18n="key">Key</span><input id="kv-key" maxlength="32" value="city" spellcheck="false"></label>
+        <label><span data-i18n="value">Value</span><input id="kv-value" maxlength="64" value="Gothenburg" spellcheck="false"></label>
+        <div class="kv-buttons">
+          <button class="btn primary" type="submit" data-op="put">Put</button>
+          <button class="btn" type="button" data-op="append">Append</button>
+          <button class="btn" type="button" data-op="get">Get</button>
+        </div>
+      </form>
+      <ol id="kv-log" class="kv-log" aria-live="polite"></ol>
+    </div>
+    <div class="events" aria-labelledby="h-events">
+      <div class="panel-head"><h2 id="h-events" data-i18n="events">What just happened</h2></div>
+      <ol id="event-list" class="event-list"></ol>
+    </div>
+  </section>
+
+  <section class="wrap test" id="test" hidden aria-labelledby="h-test">
+    <div class="panel-head"><h2 id="h-test" data-i18n="testTitle">Failover test</h2><p class="status-line" id="test-summary" aria-live="polite"></p></div>
+    <ol id="test-steps" class="steps"></ol>
+  </section>
+
+  <section class="wrap perf" id="perf" aria-labelledby="h-perf">
+    <div class="panel-head">
+      <h2 id="h-perf" data-i18n="perfTitle">What changed, in numbers</h2>
+      <p class="status-line" data-i18n="perfLead">The project I started from had no working persistence and waited for the next heartbeat before replicating every write. Same machine, same 3-node setup, median of 3 runs.</p>
+    </div>
+    <div class="charts">
+      <figure class="chart" id="chart-latency"></figure>
+      <figure class="chart" id="chart-throughput"></figure>
+    </div>
+    <p class="chart-note" data-i18n="perfNote">Measured with a C++ client against 3 nodes with fsync on, Docker on an Apple-silicon Mac. "Same settings" snapshots on almost every write, as the original did; "tuned" uses a 1 MB snapshot threshold.</p>
+    <div class="live-bench">
+      <button class="btn" id="bench" type="button" data-i18n="bench">Run a live benchmark here</button>
+      <p class="bench-out" id="bench-out" aria-live="polite"></p>
+    </div>
+    <ul class="changes" id="changes"></ul>
+  </section>
+
+  <section class="wrap how" aria-labelledby="h-how">
+    <div class="panel-head"><h2 id="h-how" data-i18n="howTitle">What is running here</h2></div>
+    <ul class="how-list" id="how-list"></ul>
+  </section>
+</main>
+
+<footer class="wrap foot">
+  <p><span data-i18n="footA">Everything on this page talks to real processes: five </span><code>raftNode</code><span data-i18n="footB"> programs in one container, driven over their own RPC protocol.</span></p>
+  <p><a href="https://github.com/44sunsetsf/KVstorageBaseRaft-cpp" target="_blank" rel="noopener">github.com/44sunsetsf/KVstorageBaseRaft-cpp</a></p>
+</footer>
+<script src="app.js"></script>
+</body>
+</html>

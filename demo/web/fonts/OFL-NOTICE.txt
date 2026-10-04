@@ -1,0 +1,2 @@
+Bricolage Grotesque and JetBrains Mono are licensed under the SIL Open Font License 1.1
+(https://openfontlicense.org). They are self-hosted here so the page does not depend on Google Fonts.

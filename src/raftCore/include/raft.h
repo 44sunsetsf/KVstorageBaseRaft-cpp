@@ -32,6 +32,24 @@ constexpr int Voted = 1;   //本轮已经投过票了
 constexpr int Expire = 2;  //投票（消息、竞选者）过期
 constexpr int Normal = 3;
 
+// 节点状态快照，给监控/可视化用（只读，加锁复制）
+struct RaftStatus {
+  int role = 0;  // 0 Follower, 1 Candidate, 2 Leader
+  int term = 0;
+  int votedFor = -1;
+  int commitIndex = 0;
+  int lastApplied = 0;
+  int lastLogIndex = 0;
+  int snapshotIndex = 0;
+  int raftStateBytes = 0;
+  struct Entry {
+    int index;
+    int term;
+    std::string command;  // Op::asString() 的原始内容
+  };
+  std::vector<Entry> tail;  // 日志末尾若干条
+};
+
 class Raft : public raftRpcProctoc::raftRpc {
  private:
   std::mutex m_mtx;
@@ -96,6 +114,7 @@ class Raft : public raftRpcProctoc::raftRpc {
   int getNewCommandIndex();
   void getPrevLogInfo(int server, int *preIndex, int *preTerm);
   void GetState(int *term, bool *isLeader);
+  void GetStatus(RaftStatus *out, int tailLen);
   void InstallSnapshot(const raftRpcProctoc::InstallSnapshotRequest *args,
                        raftRpcProctoc::InstallSnapshotResponse *reply);
   void leaderHearBeatTicker();

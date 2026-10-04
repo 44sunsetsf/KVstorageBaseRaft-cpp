@@ -40,17 +40,20 @@ void RpcProvider::NotifyService(google::protobuf::Service *service) {
 }
 
 // 启动rpc服务节点，开始提供rpc远程网络调用服务
-void RpcProvider::Run(int nodeIndex, short port, const std::string &confFile) {
-  //获取可用ip
-  char *ipC;
-  char hname[128];
-  struct hostent *hent;
-  gethostname(hname, sizeof(hname));
-  hent = gethostbyname(hname);
-  for (int i = 0; hent->h_addr_list[i]; i++) {
-    ipC = inet_ntoa(*(struct in_addr *)(hent->h_addr_list[i]));  // IP地址
+void RpcProvider::Run(int nodeIndex, short port, const std::string &confFile, const std::string &bindIp) {
+  std::string ip = bindIp;
+  if (ip.empty()) {
+    //获取可用ip
+    char *ipC = nullptr;
+    char hname[128];
+    struct hostent *hent;
+    gethostname(hname, sizeof(hname));
+    hent = gethostbyname(hname);
+    for (int i = 0; hent->h_addr_list[i]; i++) {
+      ipC = inet_ntoa(*(struct in_addr *)(hent->h_addr_list[i]));  // IP地址
+    }
+    ip = std::string(ipC);
   }
-  std::string ip = std::string(ipC);
   //    // 获取端口
   //    if(getReleasePort(port)) //在port的基础上获取一个可用的port，不知道为何没有效果
   //    {
@@ -61,16 +64,18 @@ void RpcProvider::Run(int nodeIndex, short port, const std::string &confFile) {
   //        std::cout << "获取可用端口号失败！" << std::endl;
   //    }
   //写入配置文件（默认 test.conf）
-  std::string node = "node" + std::to_string(nodeIndex);
-  std::ofstream outfile;
-  outfile.open(confFile, std::ios::app);  //打开文件并追加写入
-  if (!outfile.is_open()) {
-    std::cout << "打开文件失败！" << std::endl;
-    exit(EXIT_FAILURE);
+  if (!confFile.empty()) {
+    std::string node = "node" + std::to_string(nodeIndex);
+    std::ofstream outfile;
+    outfile.open(confFile, std::ios::app);  //打开文件并追加写入
+    if (!outfile.is_open()) {
+      std::cout << "打开文件失败！" << std::endl;
+      exit(EXIT_FAILURE);
+    }
+    outfile << node + "ip=" + ip << std::endl;
+    outfile << node + "port=" + std::to_string(port) << std::endl;
+    outfile.close();
   }
-  outfile << node + "ip=" + ip << std::endl;
-  outfile << node + "port=" + std::to_string(port) << std::endl;
-  outfile.close();
 
   //创建服务器
   muduo::net::InetAddress address(ip, port);

@@ -15,6 +15,7 @@
 #include <boost/serialization/serialization.hpp>
 #include <boost/serialization/unordered_map.hpp>
 #include <boost/serialization/vector.hpp>
+#include <functional>
 #include <iostream>
 #include <mutex>
 #include <unordered_map>
@@ -24,6 +25,10 @@
 
 class KvServer : raftKVRpcProctoc::kvServerRpc {
  private:
+  // 连接其他节点、初始化 raft、装载快照，然后阻塞在 apply 循环里
+  void connectAndRun(const std::vector<std::pair<std::string, short> > &peers, std::shared_ptr<Persister> persister,
+                     bool staggeredStart, const std::function<void()> &afterRaftInit);
+
   std::mutex m_mtx;
   int m_me;
   std::shared_ptr<Raft> m_raftNode;
@@ -47,8 +52,14 @@ class KvServer : raftKVRpcProctoc::kvServerRpc {
   KvServer() = delete;
 
   KvServer(int me, int maxraftstate, std::string nodeInforFileName, short port);
+  // peers：整个集群（含自己）的 ip/port，下标即节点编号；bindIp 为本节点监听地址
+  KvServer(int me, int maxraftstate, const std::vector<std::pair<std::string, short> > &peers, short port,
+           const std::string &bindIp);
 
   void StartKVServer();
+
+  // 当前状态（term、角色、commit/apply 进度、日志末尾），用于监控与可视化
+  void Status(const raftKVRpcProctoc::StatusArgs *args, raftKVRpcProctoc::StatusReply *reply);
 
   void DprintfKVDB();
 
@@ -93,6 +104,9 @@ class KvServer : raftKVRpcProctoc::kvServerRpc {
 
   void Get(google::protobuf::RpcController *controller, const ::raftKVRpcProctoc::GetArgs *request,
            ::raftKVRpcProctoc::GetReply *response, ::google::protobuf::Closure *done) override;
+
+  void Status(google::protobuf::RpcController *controller, const ::raftKVRpcProctoc::StatusArgs *request,
+              ::raftKVRpcProctoc::StatusReply *response, ::google::protobuf::Closure *done) override;
 
   /////////////////serialiazation start ///////////////////////////////
   // notice ： func serialize

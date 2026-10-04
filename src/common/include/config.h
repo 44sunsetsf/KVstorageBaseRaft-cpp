@@ -5,7 +5,14 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-const bool Debug = true;
+#include <cstdlib>
+#include <cstring>
+
+// 调试输出开关，默认打开；设置环境变量 RAFT_DEBUG=0 可以关闭（压测、公网演示时日志量很大）
+inline const bool Debug = [] {
+  const char* v = std::getenv("RAFT_DEBUG");
+  return !(v != nullptr && std::strcmp(v, "0") == 0);
+}();
 
 const int debugMul = 1;  // 时间单位：time.Millisecond，不同网络环境rpc速度不同，因此需要乘以一个系数
 const int HeartBeatTimeout = 25 * debugMul;  // 心跳时间一般要比选举超时小一个数量级

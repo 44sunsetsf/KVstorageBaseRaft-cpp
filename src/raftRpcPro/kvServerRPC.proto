@@ -39,6 +39,30 @@ message PutAppendReply  {
 }
 
 
+// 查询节点当前状态，给可视化页面和运维脚本用
+message StatusArgs {
+}
+
+message LogBrief {
+  int32 Index = 1;
+  int32 Term = 2;
+  bytes Summary = 3;  // 例如 "Put k=v"
+}
+
+message StatusReply {
+  int32 NodeId = 1;
+  int32 Role = 2;  // 0 Follower, 1 Candidate, 2 Leader
+  int32 Term = 3;
+  int32 VotedFor = 4;
+  int32 CommitIndex = 5;
+  int32 LastApplied = 6;
+  int32 LastLogIndex = 7;
+  int32 SnapshotIndex = 8;
+  int32 KvCount = 9;
+  int32 RaftStateBytes = 10;
+  repeated LogBrief Tail = 11;  // 日志末尾若干条
+}
+
 //只有raft节点之间才会涉及rpc通信
 service kvServerRpc
 {
@@ -47,6 +71,7 @@ service kvServerRpc
 
   rpc PutAppend(PutAppendArgs) returns(PutAppendReply);
   rpc Get (GetArgs) returns (GetReply);
+  rpc Status (StatusArgs) returns (StatusReply);
 }
 // message ResultCode
 // {
