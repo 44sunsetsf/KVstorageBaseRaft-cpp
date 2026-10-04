@@ -35,7 +35,13 @@ wait_healthy() {
 }
 
 smoke() {
-  code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 30 "$SMOKE_URL/api/healthz") || true
+  # 新子域名第一次访问时 Caddy 要先签发 HTTPS 证书，头几秒可能连不上，所以重试一会儿
+  code=000
+  for _ in $(seq 1 30); do
+    code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 10 "$SMOKE_URL/api/healthz") || true
+    [ "$code" = 200 ] && break
+    sleep 3
+  done
   [ "$code" = 200 ] || { echo "  $SMOKE_URL/api/healthz 返回 $code"; return 1; }
   python3 demo/tests/e2e.py "$SMOKE_URL"
 }
@@ -78,6 +84,8 @@ say "本机构建 linux/amd64 镜像（第一次要几分钟，之后有缓存�
 docker buildx build --platform linux/amd64 -f demo/Dockerfile -t "$IMAGE:new" --load .
 say "传到服务器"
 docker save "$IMAGE:new" | gzip | ssh "$HOST" 'gunzip | docker load' >/dev/null
+has_old=1
+remote "docker image inspect $IMAGE:latest >/dev/null 2>&1" || has_old=0
 remote "docker tag $IMAGE:latest $IMAGE:prev 2>/dev/null || true; docker tag $IMAGE:new $IMAGE:latest && docker rmi $IMAGE:new >/dev/null"
 
 # ── 3. 第一次部署：安装 Caddy 站点配置 ──────────────────────────────────────────
@@ -98,6 +106,7 @@ if [ "$started" = ok ] && wait_healthy && smoke; then
   remote "echo $commit > .deployed; docker image prune -f >/dev/null"
   say "部署完成：${commit:0:7} 已上线，$SMOKE_URL 正常。回滚用 demo/deploy/deploy.sh rollback"
 else
+  [ "$has_old" = 1 ] || die "第一次部署没有通过检查，没有旧版本可以回滚，容器保持运行。日志：ssh $HOST 'docker logs --tail 80 $CONTAINER'"
   echo "✗ 新版本没有通过检查，自动回滚" >&2
   rollback
   wait_healthy && smoke && die "已回滚到旧版本，站点正常。新版本的日志：ssh $HOST 'docker logs --tail 80 $CONTAINER'"
