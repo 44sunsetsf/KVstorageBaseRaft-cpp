@@ -11,6 +11,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <cerrno>
+#include <random>
 #include <string>
 #include <vector>
 #include "kvServerRPC.pb.h"
@@ -23,9 +24,16 @@ class Clerk {
   int m_requestId;
   int m_recentLeaderId;  //只是有可能是领导
 
+  // 用于返回随机的clientId。必须用真随机：服务端按 (ClientId, RequestId) 去重，
+  // 如果不同进程的 clientId 相同，后启动的客户端的写请求会被当成重复请求丢弃
   std::string Uuid() {
-    return std::to_string(rand()) + std::to_string(rand()) + std::to_string(rand()) + std::to_string(rand());
-  }  //用于返回随机的clientId
+    std::random_device rd;
+    std::string id;
+    for (int i = 0; i < 4; ++i) {
+      id += std::to_string(rd());
+    }
+    return id;
+  }
 
   //    MakeClerk  todo
   void PutAppend(std::string key, std::string value, std::string op);

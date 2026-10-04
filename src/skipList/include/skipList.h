@@ -296,7 +296,8 @@ void SkipList<K, V>::load_file(const std::string &dumpStr) {
   boost::archive::text_iarchive ia(iss);
   ia >> dumper;
   for (int i = 0; i < dumper.keyDumpVt_.size(); ++i) {
-    insert_element(dumper.keyDumpVt_[i], dumper.keyDumpVt_[i]);
+    // 用 insert_set_element：key 已存在时覆盖旧值（follower 安装更新的快照时需要）
+    insert_set_element(dumper.keyDumpVt_[i], dumper.valDumpVt_[i]);
   }
 }
 

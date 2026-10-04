@@ -18,7 +18,8 @@ class RpcProvider {
   void NotifyService(google::protobuf::Service *service);
 
   // 启动rpc服务节点，开始提供rpc远程网络调用服务
-  void Run(int nodeIndex, short port);
+  // 把本节点的 ip/port 追加写入 confFile，供其他节点和客户端读取
+  void Run(int nodeIndex, short port, const std::string &confFile = "test.conf");
 
  private:
   // 组合EventLoop

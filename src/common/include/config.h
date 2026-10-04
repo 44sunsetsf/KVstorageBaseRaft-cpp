@@ -16,6 +16,9 @@ const int maxRandomizedElectionTime = 500 * debugMul;  // ms
 
 const int CONSENSUS_TIMEOUT = 500 * debugMul;  // ms
 
+// 持久化时是否 fsync。关掉后重启仍能恢复，但机器断电可能丢数据，仅用于对比测试性能
+const bool PERSIST_FSYNC = true;
+
 // 协程相关设置
 
 const int FIBER_THREAD_NUM = 1;              // 协程库中线程池大小

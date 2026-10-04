@@ -39,7 +39,7 @@ void RpcProvider::NotifyService(google::protobuf::Service *service) {
 }
 
 // 启动rpc服务节点，开始提供rpc远程网络调用服务
-void RpcProvider::Run(int nodeIndex, short port) {
+void RpcProvider::Run(int nodeIndex, short port, const std::string &confFile) {
   //获取可用ip
   char *ipC;
   char hname[128];
@@ -59,10 +59,10 @@ void RpcProvider::Run(int nodeIndex, short port) {
   //    {
   //        std::cout << "获取可用端口号失败！" << std::endl;
   //    }
-  //写入文件 "test.conf"
+  //写入配置文件（默认 test.conf）
   std::string node = "node" + std::to_string(nodeIndex);
   std::ofstream outfile;
-  outfile.open("test.conf", std::ios::app);  //打开文件并追加写入
+  outfile.open(confFile, std::ios::app);  //打开文件并追加写入
   if (!outfile.is_open()) {
     std::cout << "打开文件失败！" << std::endl;
     exit(EXIT_FAILURE);

@@ -4,29 +4,17 @@
 
 #ifndef SKIP_LIST_ON_RAFT_PERSISTER_H
 #define SKIP_LIST_ON_RAFT_PERSISTER_H
-#include <fstream>
 #include <mutex>
+#include <string>
+
+// 把 raft 状态和快照落到本地文件。每次写入都是“写临时文件 -> fsync -> rename -> fsync 目录”，
+// 崩溃时磁盘上要么是旧文件，要么是完整的新文件，不会出现写了一半的状态。
+// 构造时不清空已有文件，节点重启后可以通过 ReadRaftState / ReadSnapshot 恢复。
 class Persister {
  private:
   std::mutex m_mtx;
-  std::string m_raftState;
-  std::string m_snapshot;
-  /**
-   * m_raftStateFileName: raftState文件名
-   */
   const std::string m_raftStateFileName;
-  /**
-   * m_snapshotFileName: snapshot文件名
-   */
   const std::string m_snapshotFileName;
-  /**
-   * 保存raftState的输出流
-   */
-  std::ofstream m_raftStateOutStream;
-  /**
-   * 保存snapshot的输出流
-   */
-  std::ofstream m_snapshotOutStream;
   /**
    * 保存raftStateSize的大小
    * 避免每次都读取文件来获取具体的大小
@@ -40,12 +28,11 @@ class Persister {
   long long RaftStateSize();
   std::string ReadRaftState();
   explicit Persister(int me);
-  ~Persister();
+  ~Persister() = default;
 
  private:
-  void clearRaftState();
-  void clearSnapshot();
-  void clearRaftStateAndSnapshot();
+  static void writeFileAtomically(const std::string& path, const std::string& data);
+  static std::string readWholeFile(const std::string& path);
 };
 
 #endif  // SKIP_LIST_ON_RAFT_PERSISTER_H

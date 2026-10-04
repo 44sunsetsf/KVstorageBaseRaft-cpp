@@ -1015,8 +1015,9 @@ void Raft::init(std::vector<std::shared_ptr<RaftRpcUtil>> peers, int me, std::sh
   // initialize from state persisted before a crash
   readPersist(m_persister->ReadRaftState());
   if (m_lastSnapshotIncludeIndex > 0) {
+    // 快照里的内容一定是已提交、已应用的
     m_lastApplied = m_lastSnapshotIncludeIndex;
-    // rf.commitIndex = rf.lastSnapshotIncludeIndex   todo ：崩溃恢复为何不能读取commitIndex
+    m_commitIndex = m_lastSnapshotIncludeIndex;
   }
 
   DPrintf("[Init&ReInit] Sever %d, term %d, lastSnapshotIncludeIndex {%d} , lastSnapshotIncludeTerm {%d}", m_me,
