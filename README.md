@@ -17,8 +17,6 @@
 
 Start several nodes and they form one cluster that behaves like a single key-value database. Clients `Put`, `Append` and `Get` against it; every write goes through the Raft log and is applied in the same order on every node, so the cluster keeps serving correct data **as long as a majority of nodes are alive**. When the leader goes down, the remaining nodes elect a new one and the client finds it on its own.
 
-> This repository started from [youngyangyang04/KVstorageBaseRaft-cpp](https://github.com/youngyangyang04/KVstorageBaseRaft-cpp). I keep it here to study the implementation and iterate on it — see [Roadmap](#roadmap).
-
 ## Architecture
 
 ```
@@ -131,7 +129,3 @@ Directions I plan to work on:
 - **Performance**: batched and pipelined `AppendEntries`, connection reuse and a framed receive loop in the RPC client (it currently reads a single 1 KB buffer), and replacing per-RPC `std::thread` with the fiber scheduler.
 - **Persistence**: atomic writes with fsync, and a pluggable storage engine.
 - **Cluster features**: membership changes and sharding.
-
-## Credits
-
-Original project by [youngyangyang04](https://github.com/youngyangyang04) and contributors ([upstream](https://github.com/youngyangyang04/KVstorageBaseRaft-cpp)). The upstream repository does not publish a license.

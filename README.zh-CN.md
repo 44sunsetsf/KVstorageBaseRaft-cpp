@@ -17,8 +17,6 @@
 
 启动多个节点，它们组成一个集群，对外表现得像一台单机 KV 数据库。客户端可以 `Put`、`Append`、`Get`；每次写入都经过 Raft 日志，在所有节点上按相同顺序执行，因此**只要多数节点存活**，集群就能继续提供正确的数据。Leader 宕机后，剩余节点会重新选出 Leader，客户端会自己找到它。
 
-> 本仓库基于 [youngyangyang04/KVstorageBaseRaft-cpp](https://github.com/youngyangyang04/KVstorageBaseRaft-cpp)，我在这里学习它的实现并持续迭代优化，计划见[后续迭代](#后续迭代)。
-
 ## 架构
 
 ```
@@ -131,7 +129,3 @@ KVstorageBaseRaft-cpp
 - **性能**：`AppendEntries` 批量与流水线发送；RPC 客户端复用连接并按帧循环接收（目前只读一次 1 KB 缓冲区）；用协程调度替代每次 RPC 新开 `std::thread`。
 - **持久化**：原子写入 + fsync，存储引擎可插拔。
 - **集群能力**：成员变更与分片。
-
-## 致谢
-
-原项目作者为 [youngyangyang04](https://github.com/youngyangyang04) 及各位贡献者（[上游仓库](https://github.com/youngyangyang04/KVstorageBaseRaft-cpp)）。上游仓库未声明开源许可证。
